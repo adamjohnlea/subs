@@ -4,8 +4,6 @@ import SwiftTUI
 /// environment so every screen reads the same instance with
 /// `@Environment(AppModel.self)`, and routes to the screen for `model.screen`.
 ///
-/// The individual screens are filled in by later tasks; for now each case
-/// renders its name so the shell launches and the routing is visible.
 struct RootView: View {
     @State private var model = AppModel()
 
@@ -25,9 +23,9 @@ struct RootView: View {
         case .languages:
             LanguageScreen(model: model)
         case .running:
-            Text("screen: running")
+            RunScreen(model: model)
         case .done:
-            Text("screen: done")
+            DoneScreen(model: model)
         }
     }
 }
