@@ -13,28 +13,51 @@ struct LanguageScreen: View {
     var body: some View {
         if model.availableTargets.isEmpty {
             VStack(alignment: .leading, spacing: 1) {
-                Text("No translation languages are installed.")
-                Text("Install them in System Settings > Language & Region > Translation Languages, then restart.")
+                CompactHeader(step: .languages)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("No translation languages are installed.")
+                    Text("Install them in System Settings > Language & Region > Translation Languages, then restart.")
+                        .foregroundStyle(.secondary)
+                }
+                .card("Target languages")
                 Button("Back") { model.screen = .input }
+                    .foregroundStyle(Theme.accent)
+                HintFooter(hints: [("↵", "back")])
             }
-            .padding()
         } else {
             VStack(alignment: .leading, spacing: 1) {
-                Text("Select target languages (space toggles, enter continues):")
-                List(selection: $model.selectedTargets) {
-                    ForEach(model.availableTargets, id: \.self) { target in
-                        Text(target.displayName).tag(target)
+                CompactHeader(step: .languages)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("space toggles  ·  enter continues").foregroundStyle(.secondary)
+                    List(selection: $model.selectedTargets) {
+                        ForEach(model.availableTargets, id: \.self) { target in
+                            let isSelected = model.selectedTargets.contains(target)
+                            HStack(spacing: 1) {
+                                Text(isSelected ? "◉ " : "○ ")
+                                    .foregroundStyle(isSelected
+                                                     ? AnyShapeStyle(Theme.accent)
+                                                     : AnyShapeStyle(.secondary))
+                                Text(target.displayName)
+                                Text("  \(target.code)").foregroundStyle(.secondary)
+                            }
+                            .tag(target)
+                        }
+                    }
+                    if model.selectedTargets.isEmpty {
+                        Text("Select at least one language.").foregroundStyle(.secondary)
+                    } else {
+                        Text("\(model.selectedTargets.count) selected").foregroundStyle(Theme.accent)
                     }
                 }
-                if model.selectedTargets.isEmpty {
-                    Text("Select at least one language.")
-                }
+                .card("Target languages")
                 Button("Translate") {
                     if !model.selectedTargets.isEmpty { model.screen = .running }
                 }
+                .foregroundStyle(Theme.accent)
                 Button("Back") { model.screen = .input }
+                    .foregroundStyle(.secondary)
+                HintFooter(hints: [("↑↓", "move"), ("space", "select"), ("↵", "translate"), ("esc", "back")])
             }
-            .padding()
         }
     }
 }
