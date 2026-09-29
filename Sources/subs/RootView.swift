@@ -1,4 +1,4 @@
-import SwiftTUIRuntime
+import SwiftTUI
 
 /// The app's root view. It owns the single `AppModel`, injects it into the
 /// environment so every screen reads the same instance with
@@ -21,7 +21,7 @@ struct RootView: View {
     private var currentScreen: some View {
         switch model.screen {
         case .input:
-            Text("screen: input")
+            InputScreen(model: model)
         case .languages:
             Text("screen: languages")
         case .running:
