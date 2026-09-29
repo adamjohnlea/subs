@@ -37,3 +37,23 @@ extension AppModel.Screen {
         }
     }
 }
+
+/// The pieces the run screen needs to draw progress: a 0...1 fraction for the
+/// bar, a percentage string, and a "completed of total" unit count.
+struct ProgressLine: Equatable {
+    let fraction: Double
+    let percentText: String
+    let countText: String
+}
+
+/// Formats overall progress from the job's unit counts. A unit is one file
+/// translated into one language.
+func progressLine(completedUnits: Int, totalUnits: Int) -> ProgressLine {
+    let fraction = totalUnits > 0 ? Double(completedUnits) / Double(totalUnits) : 0
+    let percent = Int((fraction * 100).rounded())
+    return ProgressLine(
+        fraction: fraction,
+        percentText: "\(percent)%",
+        countText: "\(completedUnits) of \(totalUnits)"
+    )
+}

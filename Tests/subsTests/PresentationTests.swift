@@ -18,3 +18,17 @@ import Foundation
     #expect(AppModel.Screen.running.step == .translate)
     #expect(AppModel.Screen.done.step == .done)
 }
+
+@Test func progressLineComputesPercentAndCount() {
+    let p = progressLine(completedUnits: 3, totalUnits: 5)
+    #expect(p.percentText == "60%")
+    #expect(p.countText == "3 of 5")
+    #expect(abs(p.fraction - 0.6) < 0.0001)
+}
+
+@Test func progressLineHandlesZeroTotal() {
+    let p = progressLine(completedUnits: 0, totalUnits: 0)
+    #expect(p.fraction == 0)
+    #expect(p.percentText == "0%")
+    #expect(p.countText == "0 of 0")
+}
