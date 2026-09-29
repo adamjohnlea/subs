@@ -36,7 +36,11 @@ public struct FileDiscovery {
             options: [.skipsHiddenFiles])
         let srts = contents
             .filter { $0.pathExtension.lowercased() == "srt" }
-            .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) != true }
+            .filter { url in
+                var isDirectory: ObjCBool = false
+                fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
+                return !isDirectory.boolValue
+            }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
         guard !srts.isEmpty else { throw SubtitleDiscoveryError.noSRTFiles(path) }
         return srts
