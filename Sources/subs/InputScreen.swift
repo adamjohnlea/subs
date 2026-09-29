@@ -29,6 +29,10 @@ struct InputScreen: View {
     /// `model.errorMessage` and stays on this screen.
     private func advance() async {
         model.errorMessage = nil
+        guard !model.inputPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            model.errorMessage = "Enter a file or folder path."
+            return
+        }
         let url = URL(fileURLWithPath: (model.inputPath as NSString).expandingTildeInPath)
         do {
             let files = try FileDiscovery().srtFiles(at: url)

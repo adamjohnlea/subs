@@ -1,10 +1,13 @@
 import Foundation
 import Translation
 
+/// Errors raised by `AppleTranslator`.
 public enum TranslatorError: Error {
+    /// The translation pack for the target language is not installed.
     case notInstalled(target: Locale.Language)
 }
 
+/// Translates lines of text between languages.
 public protocol Translating: Sendable {
     /// Translates each input string independently, preserving order and count.
     func translate(_ lines: [String],
@@ -12,9 +15,14 @@ public protocol Translating: Sendable {
                    to target: Locale.Language) async throws -> [String]
 }
 
+/// A `Translating` implementation backed by Apple's on-device Translation framework.
 public struct AppleTranslator: Translating {
+    /// Creates a translator.
     public init() {}
 
+    /// Translates each line on-device, leaving blank lines untouched.
+    ///
+    /// - Throws: `TranslatorError.notInstalled` if the target language pack is missing.
     public func translate(_ lines: [String],
                           from source: Locale.Language,
                           to target: Locale.Language) async throws -> [String] {

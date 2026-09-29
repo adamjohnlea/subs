@@ -2,17 +2,25 @@ import Foundation
 
 /// The result of translating one file into one language.
 public struct JobOutcome: Sendable {
+    /// The source file this outcome belongs to.
     public let input: URL
+    /// The language the file was translated into.
     public let target: TargetLanguage
+    /// The written output file, or `nil` if the unit failed.
     public let output: URL?
+    /// A description of the failure, or `nil` if the unit succeeded.
     public let errorMessage: String?
 }
 
 /// Progress after each unit (one file × one language) finishes.
 public struct JobProgress: Sendable {
+    /// The number of units finished so far.
     public let completedUnits: Int
+    /// The total number of units (files times languages).
     public let totalUnits: Int
+    /// The name of the file most recently processed.
     public let currentFile: String
+    /// The display name of the language most recently processed.
     public let currentLanguage: String
 }
 
@@ -22,6 +30,7 @@ public enum TranslationJobError: Error, Equatable {
     case lineCountMismatch(expected: Int, got: Int)
 }
 
+/// Translates subtitle files into one or more languages and writes the results next to the originals.
 public struct TranslationJob {
     private let discovery: FileDiscovery
     private let parser: SRTParser
@@ -29,6 +38,7 @@ public struct TranslationJob {
     private let translator: Translating
     private let source: Locale.Language
 
+    /// Creates a job with its collaborators; the defaults use the real file system and Apple's translator.
     public init(
         discovery: FileDiscovery = FileDiscovery(),
         parser: SRTParser = SRTParser(),
@@ -43,6 +53,15 @@ public struct TranslationJob {
         self.source = source
     }
 
+    /// Translates every discovered file into every target, reporting progress after each unit.
+    ///
+    /// Failures are recorded per unit in the returned outcomes rather than thrown.
+    ///
+    /// - Parameters:
+    ///   - paths: `.srt` files or folders to translate.
+    ///   - targets: The languages to translate into.
+    ///   - progress: Called after each file-and-language unit finishes.
+    /// - Returns: One outcome per file and language.
     public func run(
         paths: [URL],
         targets: [TargetLanguage],

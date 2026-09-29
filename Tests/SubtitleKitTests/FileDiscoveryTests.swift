@@ -36,3 +36,21 @@ private func makeTempDir() throws -> URL {
     try "x".write(to: dir.appendingPathComponent("notes.txt"), atomically: true, encoding: .utf8)
     #expect(throws: SubtitleDiscoveryError.self) { try FileDiscovery().srtFiles(at: dir) }
 }
+
+@Test func ignoresHiddenAppleDoubleFiles() throws {
+    let dir = try makeTempDir()
+    for name in ["._movie.srt", "a.srt"] {
+        try "x".write(to: dir.appendingPathComponent(name), atomically: true, encoding: .utf8)
+    }
+    let found = try FileDiscovery().srtFiles(at: dir)
+    #expect(found.map(\.lastPathComponent) == ["a.srt"])
+}
+
+@Test func ignoresSubdirectoriesNamedLikeSRTs() throws {
+    let dir = try makeTempDir()
+    try FileManager.default.createDirectory(
+        at: dir.appendingPathComponent("nested.srt"), withIntermediateDirectories: false)
+    try "x".write(to: dir.appendingPathComponent("a.srt"), atomically: true, encoding: .utf8)
+    let found = try FileDiscovery().srtFiles(at: dir)
+    #expect(found.map(\.lastPathComponent) == ["a.srt"])
+}

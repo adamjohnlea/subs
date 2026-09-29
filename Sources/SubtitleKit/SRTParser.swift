@@ -1,14 +1,25 @@
 import Foundation
 
+/// Reasons an `.srt` file can fail to parse. Block numbers are 1-based.
 public enum SRTParseError: Error, Equatable {
+    /// The text contains no cue blocks.
     case empty
+    /// The block's first line is not an integer cue index.
     case missingIndex(block: Int)
+    /// The block has no timestamp line, or the line is not `HH:MM:SS,mmm --> HH:MM:SS,mmm`.
     case malformedTimestamp(block: Int)
 }
 
+/// Parses `.srt` text into a `SubtitleDocument`.
 public struct SRTParser: Sendable {
+    /// Creates a parser.
     public init() {}
 
+    /// Parses `.srt` text into a document, tolerating a leading BOM and CRLF or CR line endings.
+    ///
+    /// - Parameter text: The full contents of an `.srt` file.
+    /// - Returns: The parsed document, with cue text lines preserved verbatim.
+    /// - Throws: `SRTParseError` if the text is empty or a block is malformed.
     public func parse(_ text: String) throws -> SubtitleDocument {
         // Normalize line endings and strip a leading BOM.
         var normalized = text.replacingOccurrences(of: "\r\n", with: "\n")

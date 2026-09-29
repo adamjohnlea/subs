@@ -26,9 +26,13 @@ struct LanguageScreen: View {
                         Text(target.displayName).tag(target)
                     }
                 }
+                if model.selectedTargets.isEmpty {
+                    Text("Select at least one language.")
+                }
                 Button("Translate") {
                     if !model.selectedTargets.isEmpty { model.screen = .running }
                 }
+                Button("Back") { model.screen = .input }
             }
             .padding()
         }
