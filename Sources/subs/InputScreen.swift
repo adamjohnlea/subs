@@ -14,14 +14,24 @@ struct InputScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("Enter a .srt file or a folder path:")
-            TextField("path", text: $model.inputPath)
-            if let error = model.errorMessage {
-                Text("Error: \(error)")
+            Wordmark()
+            Text("on-device subtitle translation").foregroundStyle(.secondary)
+            StepTracker(active: .input)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Drop a .srt file or a folder, or type a path:")
+                HStack(spacing: 0) {
+                    Text("▸ ").foregroundStyle(Theme.accent)
+                    TextField("path", text: $model.inputPath)
+                }
+                if let error = model.errorMessage {
+                    Text("✗ \(error)").foregroundStyle(.danger)
+                }
             }
+            .card("Input")
             Button("Continue") { Task { await advance() } }
+                .foregroundStyle(Theme.accent)
+            HintFooter(hints: [("↵", "continue"), ("^C", "quit")])
         }
-        .padding()
     }
 
     /// Discovers subtitle files at the typed path and the installed target
