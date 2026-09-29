@@ -21,6 +21,7 @@ let package = Package(
       ]
     ),
     .testTarget(name: "SubtitleKitTests", dependencies: ["SubtitleKit"]),
+    .testTarget(name: "subsTests", dependencies: ["subs", "SubtitleKit"]),
   ],
   swiftLanguageModes: [.v6]
 )
