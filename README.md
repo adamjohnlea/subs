@@ -158,7 +158,9 @@ Good places to start: the roadmap items below, better inline-tag handling (see t
 
 ## Roadmap
 
-Possible next steps, not promises:
-
 - A workbench view: English and translation side by side, with per-cue editing and re-running.
 - Moving the translator to Apple's batch translation API for more speed on large files.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
