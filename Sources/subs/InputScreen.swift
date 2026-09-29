@@ -8,7 +8,7 @@ import SwiftTUI
 /// Validation is the real work of the app's first step: `FileDiscovery` must
 /// find at least one `.srt` file, and `SystemLanguageAvailability` decides
 /// which target languages are offered next. Any failure stays on this screen
-/// and is shown on the `Error:` line.
+/// and is shown as a ✗ line inside the Input card.
 struct InputScreen: View {
     @Bindable var model: AppModel
 
@@ -22,6 +22,7 @@ struct InputScreen: View {
                 HStack(spacing: 0) {
                     Text("▸ ").foregroundStyle(Theme.accent)
                     TextField("path", text: $model.inputPath)
+                        .onSubmit { Task { await advance() } }
                 }
                 if let error = model.errorMessage {
                     Text("✗ \(error)").foregroundStyle(.danger)

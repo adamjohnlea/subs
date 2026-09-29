@@ -20,15 +20,16 @@ struct LanguageScreen: View {
                         .foregroundStyle(.secondary)
                 }
                 .card("Target languages")
-                Button("Back") { model.screen = .input }
+                Button("Back") { goBack() }
                     .foregroundStyle(Theme.accent)
                 HintFooter(hints: [("↵", "back")])
             }
+            .onKeyPress(.return) { _ in goBack(); return .handled }
         } else {
             VStack(alignment: .leading, spacing: 1) {
                 CompactHeader(step: .languages)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("space toggles  ·  enter continues").foregroundStyle(.secondary)
+                    Text("space toggles  ·  enter translates").foregroundStyle(.secondary)
                     List(selection: $model.selectedTargets) {
                         ForEach(model.availableTargets, id: \.self) { target in
                             let isSelected = model.selectedTargets.contains(target)
@@ -43,6 +44,7 @@ struct LanguageScreen: View {
                             .tag(target)
                         }
                     }
+                    .onKeyPress(.return) { _ in translate(); return .handled }
                     if model.selectedTargets.isEmpty {
                         Text("Select at least one language.").foregroundStyle(.secondary)
                     } else {
@@ -50,14 +52,25 @@ struct LanguageScreen: View {
                     }
                 }
                 .card("Target languages")
-                Button("Translate") {
-                    if !model.selectedTargets.isEmpty { model.screen = .running }
-                }
-                .foregroundStyle(Theme.accent)
-                Button("Back") { model.screen = .input }
+                Button("Translate") { translate() }
+                    .foregroundStyle(Theme.accent)
+                Button("Back") { goBack() }
                     .foregroundStyle(.secondary)
                 HintFooter(hints: [("↑↓", "move"), ("space", "select"), ("↵", "translate"), ("esc", "back")])
             }
+            .onKeyPress(.escape) { _ in goBack(); return .handled }
         }
+    }
+
+    /// Advances to translation when at least one language is selected; otherwise
+    /// does nothing. Shared by the Translate button and the Return key, so both
+    /// take the same path.
+    private func translate() {
+        if !model.selectedTargets.isEmpty { model.screen = .running }
+    }
+
+    /// Returns to the input screen. Shared by the Back button and the Escape key.
+    private func goBack() {
+        model.screen = .input
     }
 }

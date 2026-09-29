@@ -33,15 +33,20 @@ struct DoneScreen: View {
                 }
             }
             .card("Done")
-            Button("Translate more") {
-                model.progress = nil
-                model.progressLog = []
-                model.outcomes = []
-                model.selectedTargets = []
-                model.screen = .input
-            }
-            .foregroundStyle(Theme.accent)
+            Button("Translate more") { startOver() }
+                .foregroundStyle(Theme.accent)
             HintFooter(hints: [("↵", "start over"), ("^C", "quit")])
         }
+        .onKeyPress(.return) { _ in startOver(); return .handled }
+    }
+
+    /// Resets the run state and returns to the input screen. Shared by the
+    /// "Translate more" button and the Return key.
+    private func startOver() {
+        model.progress = nil
+        model.progressLog = []
+        model.outcomes = []
+        model.selectedTargets = []
+        model.screen = .input
     }
 }
