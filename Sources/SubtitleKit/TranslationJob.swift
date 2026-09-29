@@ -16,6 +16,12 @@ public struct JobProgress: Sendable {
     public let currentLanguage: String
 }
 
+/// Errors raised by the orchestrator itself (as opposed to parsing or translating).
+public enum TranslationJobError: Error, Equatable {
+    /// The translator returned a different number of lines than it was given.
+    case lineCountMismatch(expected: Int, got: Int)
+}
+
 public struct TranslationJob {
     private let discovery: FileDiscovery
     private let parser: SRTParser
@@ -101,6 +107,9 @@ public struct TranslationJob {
         // then rebuild cues by their original line counts.
         let flat = document.cues.flatMap { $0.textLines }
         let translated = try await translator.translate(flat, from: source, to: target.language)
+        guard translated.count == flat.count else {
+            throw TranslationJobError.lineCountMismatch(expected: flat.count, got: translated.count)
+        }
 
         var cursor = 0
         var newCues: [Cue] = []
