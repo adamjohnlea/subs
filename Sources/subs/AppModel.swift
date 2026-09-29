@@ -39,6 +39,10 @@ final class AppModel {
     /// Progress of the running job, or `nil` before it starts.
     var progress: JobProgress?
 
+    /// A human-readable line for each completed unit (file → language), newest
+    /// last. View-only state for the run screen's activity list.
+    var progressLog: [String] = []
+
     /// The per-file, per-language results once the job finishes.
     var outcomes: [JobOutcome] = []
 

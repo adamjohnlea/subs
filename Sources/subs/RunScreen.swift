@@ -10,21 +10,46 @@ struct RunScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text("Translating…")
-            if let progress = model.progress {
-                Text("\(progress.completedUnits)/\(progress.totalUnits)  \(progress.currentFile) -> \(progress.currentLanguage)")
+            CompactHeader(step: .translate)
+            VStack(alignment: .leading, spacing: 1) {
+                if let progress = model.progress {
+                    let line = progressLine(completedUnits: progress.completedUnits,
+                                            totalUnits: progress.totalUnits)
+                    HStack(spacing: 1) {
+                        Spinner()
+                        Text(" \(progress.currentFile)")
+                        Text(" → ").foregroundStyle(.secondary)
+                        Text(progress.currentLanguage)
+                    }
+                    ProgressView(value: line.fraction)
+                        .tint(Theme.accent)
+                    Text("\(line.percentText)   \(line.countText)").foregroundStyle(.secondary)
+                    ForEach(Array(model.progressLog.enumerated()), id: \.offset) { _, entry in
+                        Text("✓ \(entry)").foregroundStyle(.success)
+                    }
+                } else {
+                    HStack(spacing: 1) {
+                        Spinner()
+                        Text(" Starting…").foregroundStyle(.secondary)
+                    }
+                }
             }
+            .card("Translating")
+            HintFooter(hints: [("^C", "cancel")])
         }
-        .padding()
         .task { await run() }
     }
 
     private func run() async {
+        model.progressLog = []
         let job = TranslationJob()
         let targets = Array(model.selectedTargets)
         let model = model
         let outcomes = await job.run(paths: model.discoveredFiles, targets: targets) { progress in
-            Task { @MainActor in model.progress = progress }
+            Task { @MainActor in
+                model.progress = progress
+                model.progressLog.append("\(progress.currentFile) → \(progress.currentLanguage)")
+            }
         }
         model.outcomes = outcomes
         model.screen = .done
