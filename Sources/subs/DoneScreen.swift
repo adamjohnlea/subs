@@ -7,22 +7,41 @@ struct DoneScreen: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text("Done.")
-            ForEach(Array(model.outcomes.enumerated()), id: \.offset) { _, outcome in
-                if let output = outcome.output {
-                    Text("✓ \(output.lastPathComponent)")
-                } else {
-                    Text("✗ \(outcome.input.lastPathComponent) (\(outcome.target.code)): \(outcome.errorMessage ?? "failed")")
+        let rows = doneRows(model.outcomes)
+        let summary = doneSummary(model.outcomes)
+        return VStack(alignment: .leading, spacing: 1) {
+            CompactHeader(step: .done)
+            VStack(alignment: .leading, spacing: 1) {
+                ForEach(rows) { row in
+                    if row.kind == .success {
+                        Text("✓ \(row.primary)").foregroundStyle(.success)
+                    } else {
+                        HStack(spacing: 1) {
+                            Text("✗ \(row.primary)").foregroundStyle(.danger)
+                            Text("  \(row.code ?? "")  ").foregroundStyle(.secondary)
+                            Text(row.reason ?? "failed").foregroundStyle(.danger)
+                        }
+                    }
+                }
+                HStack(spacing: 1) {
+                    Text("\(summary.written) written").foregroundStyle(.success)
+                    Text(" · ").foregroundStyle(.secondary)
+                    Text("\(summary.failed) failed").foregroundStyle(.danger)
+                    if let folder = summary.outputFolder {
+                        Text(" · \(folder)").foregroundStyle(.secondary)
+                    }
                 }
             }
+            .card("Done")
             Button("Translate more") {
                 model.progress = nil
+                model.progressLog = []
                 model.outcomes = []
                 model.selectedTargets = []
                 model.screen = .input
             }
+            .foregroundStyle(Theme.accent)
+            HintFooter(hints: [("↵", "start over"), ("^C", "quit")])
         }
-        .padding()
     }
 }
