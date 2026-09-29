@@ -1,29 +1,22 @@
 import SwiftTUI
 
-/// The app's root view. It owns the single `AppModel`,
-/// passes it to every screen through its initializer, and routes to the screen
-/// for `model.screen`.
+/// The app's root view. It owns the single `AppModel` and routes to the screen
+/// for `model.screen`. Each screen renders its own header, so there is no
+/// shared title line here anymore.
 struct RootView: View {
     @State private var model = AppModel()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text("subs — on-device subtitle translation")
-            currentScreen
-        }
+        currentScreen.padding()
     }
 
     @ViewBuilder
     private var currentScreen: some View {
         switch model.screen {
-        case .input:
-            InputScreen(model: model)
-        case .languages:
-            LanguageScreen(model: model)
-        case .running:
-            RunScreen(model: model)
-        case .done:
-            DoneScreen(model: model)
+        case .input:     InputScreen(model: model)
+        case .languages: LanguageScreen(model: model)
+        case .running:   RunScreen(model: model)
+        case .done:      DoneScreen(model: model)
         }
     }
 }
