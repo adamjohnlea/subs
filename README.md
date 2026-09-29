@@ -138,6 +138,24 @@ The project is two targets with a deliberate seam:
 
 That split is what would let a future two-pane editor be a second UI over the same core rather than a rewrite. The only external dependency is SwiftTUI 0.15.1, used only by the `subs` target.
 
+## Contributing
+
+Contributions are welcome. A few things will make yours land smoothly.
+
+Getting set up is the same as running the app: see Requirements and the setup steps above. You'll want the toolchain and at least one translation language pack installed so you can exercise the translation path by hand.
+
+Before you open a pull request:
+
+- `swift build` and `swift test` both pass, with no new warnings. The project holds a zero-warning bar and builds under Swift 6 strict concurrency.
+- New logic in `SubtitleKit` comes with tests. That's where the testable work lives (parsing, path derivation, the pipeline). The `subs` UI target is verified by running it, since terminal rendering isn't unit-tested.
+- Keep the seam intact. `SubtitleKit` stays UI-free with no external dependencies; anything terminal-facing belongs in `subs`. A feature that needs both gets split along that line.
+- Keep it on-device. No network calls and no third-party services. The whole point is that subtitles never leave the machine.
+- Match the surrounding style, and keep commits small and focused with clear messages.
+
+For anything large or design-changing, open an issue first so we can agree on the approach before you build it.
+
+Good places to start: the roadmap items below, better inline-tag handling (see the limitations above), or an additional subtitle format behind the existing parser seam.
+
 ## Roadmap
 
 Possible next steps, not promises:
