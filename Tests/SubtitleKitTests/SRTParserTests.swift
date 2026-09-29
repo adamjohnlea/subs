@@ -32,6 +32,8 @@ Second cue
     #expect(doc.cues.count == 2)
     #expect(doc.cues[0].textLines == ["Line one", "Line two"])
     #expect(doc.cues[1].index == 2)
+    #expect(doc.cues[1].start == "00:00:05,500")
+    #expect(doc.cues[1].end == "00:00:07,000")
     #expect(doc.cues[1].textLines == ["Second cue"])
 }
 
@@ -44,5 +46,39 @@ Second cue
 
 @Test func throwsOnMalformedTimestamp() {
     let bad = "1\nnot-a-timestamp\nHi"
-    #expect(throws: SRTParseError.self) { try SRTParser().parse(bad) }
+    #expect(throws: SRTParseError.malformedTimestamp(block: 1)) { try SRTParser().parse(bad) }
+}
+
+@Test func throwsEmptyOnEmptyString() {
+    #expect(throws: SRTParseError.empty) { try SRTParser().parse("") }
+}
+
+@Test func throwsEmptyOnWhitespaceOnlyString() {
+    let whitespaceOnly = "  \n\n  "
+    #expect(throws: SRTParseError.empty) { try SRTParser().parse(whitespaceOnly) }
+}
+
+@Test func throwsMissingIndexOnNonIntegerFirstLine() {
+    let bad = "not-a-number\n00:00:01,000 --> 00:00:04,000\nHello"
+    #expect(throws: SRTParseError.missingIndex(block: 1)) { try SRTParser().parse(bad) }
+}
+
+@Test func handlesWhitespaceOnlySeparatorLine() throws {
+    let text = "1\n00:00:01,000 --> 00:00:04,000\nFirst cue\n \n2\n00:00:05,500 --> 00:00:07,000\nSecond cue"
+    let doc = try SRTParser().parse(text)
+    #expect(doc.cues.count == 2)
+    #expect(doc.cues[0].index == 1)
+    #expect(doc.cues[0].textLines == ["First cue"])
+    #expect(doc.cues[1].index == 2)
+    #expect(doc.cues[1].textLines == ["Second cue"])
+}
+
+@Test func handlesCRLFMultiCue() throws {
+    let text = "1\r\n00:00:01,000 --> 00:00:04,000\r\nFirst\r\n\r\n2\r\n00:00:05,500 --> 00:00:07,000\r\nSecond"
+    let doc = try SRTParser().parse(text)
+    #expect(doc.cues.count == 2)
+    #expect(doc.cues[0].index == 1)
+    #expect(doc.cues[0].textLines == ["First"])
+    #expect(doc.cues[1].index == 2)
+    #expect(doc.cues[1].textLines == ["Second"])
 }

@@ -6,7 +6,7 @@ public enum SRTParseError: Error, Equatable {
     case malformedTimestamp(block: Int)
 }
 
-public struct SRTParser {
+public struct SRTParser: Sendable {
     public init() {}
 
     public func parse(_ text: String) throws -> SubtitleDocument {
@@ -15,25 +15,43 @@ public struct SRTParser {
         normalized = normalized.replacingOccurrences(of: "\r", with: "\n")
         if normalized.first == "\u{FEFF}" { normalized.removeFirst() }
 
-        // Blocks are separated by one or more blank lines.
-        let rawBlocks = normalized
-            .components(separatedBy: "\n\n")
-            .map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\n")) }
-            .filter { !$0.isEmpty }
+        // Split into lines and group into blocks separated by lines that are empty after trimming.
+        let allLines = normalized.components(separatedBy: "\n")
+        var blocks: [[String]] = []
+        var currentBlock: [String] = []
 
-        if rawBlocks.isEmpty { throw SRTParseError.empty }
+        for line in allLines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty {
+                // Separator line (empty after trimming)
+                if !currentBlock.isEmpty {
+                    blocks.append(currentBlock)
+                    currentBlock = []
+                }
+            } else {
+                // Non-separator line; keep byte-for-byte as-is
+                currentBlock.append(line)
+            }
+        }
+
+        // Don't forget the last block
+        if !currentBlock.isEmpty {
+            blocks.append(currentBlock)
+        }
+
+        if blocks.isEmpty { throw SRTParseError.empty }
 
         var cues: [Cue] = []
-        for (offset, block) in rawBlocks.enumerated() {
-            let lines = block.components(separatedBy: "\n")
-            guard let index = Int(lines[0].trimmingCharacters(in: .whitespaces)) else {
+        for (offset, block) in blocks.enumerated() {
+            let trimmedFirstLine = block[0].trimmingCharacters(in: .whitespaces)
+            guard let index = Int(trimmedFirstLine) else {
                 throw SRTParseError.missingIndex(block: offset + 1)
             }
-            guard lines.count >= 2 else {
+            guard block.count >= 2 else {
                 throw SRTParseError.malformedTimestamp(block: offset + 1)
             }
-            let (start, end) = try parseTimestamp(lines[1], block: offset + 1)
-            let textLines = Array(lines.dropFirst(2))
+            let (start, end) = try parseTimestamp(block[1], block: offset + 1)
+            let textLines = Array(block.dropFirst(2))
             cues.append(Cue(index: index, start: start, end: end, textLines: textLines))
         }
         return SubtitleDocument(cues: cues)
