@@ -1,7 +1,10 @@
-// Replaced in Milestone 2. Present now only so `swift build` succeeds.
+import SwiftTUI
+
 @main
-struct SubsApp {
-    static func main() {
-        print("subs: TUI arrives in Milestone 2")
+struct SubsApp: App {
+    var body: some Scene {
+        WindowGroup("subs", id: WindowIdentifier("subs")) {
+            RootView()
+        }
     }
 }
