@@ -23,7 +23,7 @@ struct RootView: View {
         case .input:
             InputScreen(model: model)
         case .languages:
-            Text("screen: languages")
+            LanguageScreen(model: model)
         case .running:
             Text("screen: running")
         case .done:
