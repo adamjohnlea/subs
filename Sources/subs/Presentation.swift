@@ -1,3 +1,4 @@
+import Foundation
 import SubtitleKit
 
 /// The four screens the app moves through, as an ordered, labeled sequence for
@@ -56,4 +57,45 @@ func progressLine(completedUnits: Int, totalUnits: Int) -> ProgressLine {
         percentText: "\(percent)%",
         countText: "\(completedUnits) of \(totalUnits)"
     )
+}
+
+/// Whether a done-screen row is a written file or a failure.
+enum DoneRowKind: Equatable { case success, failure }
+
+/// One row on the done screen. Success rows carry only the output filename;
+/// failure rows carry the source filename, the language code, and the reason.
+struct DoneRow: Equatable, Identifiable {
+    let id: Int
+    let kind: DoneRowKind
+    let primary: String
+    let code: String?
+    let reason: String?
+}
+
+/// Turns raw outcomes into ordered, displayable rows.
+func doneRows(_ outcomes: [JobOutcome]) -> [DoneRow] {
+    outcomes.enumerated().map { index, outcome in
+        if let output = outcome.output {
+            return DoneRow(id: index, kind: .success,
+                           primary: output.lastPathComponent, code: nil, reason: nil)
+        }
+        return DoneRow(id: index, kind: .failure,
+                       primary: outcome.input.lastPathComponent,
+                       code: outcome.target.code,
+                       reason: outcome.errorMessage ?? "failed")
+    }
+}
+
+/// The counted summary line: how many were written, how many failed, and the
+/// folder the outputs landed in (the first success's directory), if any.
+struct DoneSummary: Equatable {
+    let written: Int
+    let failed: Int
+    let outputFolder: String?
+}
+
+func doneSummary(_ outcomes: [JobOutcome]) -> DoneSummary {
+    let written = outcomes.filter { $0.output != nil }.count
+    let folder = outcomes.compactMap { $0.output?.deletingLastPathComponent().path }.first
+    return DoneSummary(written: written, failed: outcomes.count - written, outputFolder: folder)
 }
