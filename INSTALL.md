@@ -25,11 +25,17 @@ it).
 
 Double-click `subs-vX.Y.Z.pkg` and follow the prompts. macOS asks for your
 Mac login password once during install (in a normal dialog box, where you can
-see it accepting what you type). Then open Terminal and run it from anywhere:
+see it accepting what you type). Then open Terminal and run it from any folder
+by typing just its name:
 
 ```
 subs
 ```
+
+Type `subs` on its own — **not** `./subs`. The installer puts it on your PATH,
+so your shell finds it from anywhere. (`./subs` means "a file named subs in
+this exact folder," which only applies to the raw-binary route below. If you
+installed the `.pkg`, you are done — ignore that section.)
 
 **Why does it ask for my password?** The installer is copying `subs` into a
 protected system folder (`/usr/local/bin`), so macOS asks for your Mac login
@@ -38,11 +44,14 @@ folder, not `subs` doing anything online. The app itself never asks for a
 login, API key, or account. Once it's installed, just run `subs` — no `sudo`,
 no password.
 
-### Alternative: a raw binary (`.zip`)
+### Only if you got a `.zip` instead (skip if you used the `.pkg`)
 
-If you got a `.zip` instead of a `.pkg`, you don't have to install anything —
-you can run it right where it is. Unzip it, then in Terminal go to that folder
-and run it:
+Most people should use the `.pkg` above and can ignore this section. This is
+only for the case where you were handed a raw, unsigned binary in a `.zip`
+rather than the installer.
+
+You don't have to install anything — you can run it right where it is. Unzip
+it, then in Terminal go to that folder and run it:
 
 ```
 cd ~/Downloads        # wherever you unzipped it

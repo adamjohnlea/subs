@@ -45,10 +45,16 @@ If no packs are installed when you launch subs, it tells you so and points you b
 Grab the latest signed, notarized installer from the [releases page](https://github.com/adamjohnlea/subs/releases/latest):
 
 1. Download `subs-vX.Y.Z.pkg`.
-2. Double-click it. It installs `subs` into `/usr/local/bin`.
-3. Open a terminal and run `subs`.
+2. Double-click it and follow the prompts (macOS asks for your login password once, to install into `/usr/local/bin`).
+3. Open a terminal and run it by typing just its name:
 
-It's signed with a Developer ID and notarized by Apple, so it runs with no Gatekeeper warnings and needs no Xcode or Swift toolchain. All you need is an Apple Silicon Mac on macOS 26+ with at least one language pack installed (above).
+```bash
+subs
+```
+
+`subs` is a terminal command, not an app you double-click — run it by typing `subs` (on its own, no `./`), not from Finder or with `open -a`. The installer puts it on your PATH, so it works from any folder.
+
+It's signed with a Developer ID and notarized by Apple, so it runs with no Gatekeeper warnings and needs no Xcode or Swift toolchain. All you need is an Apple Silicon Mac on macOS 26+ with at least one language pack installed (above). Full step-by-step and troubleshooting (including the raw-binary route) are in [INSTALL.md](INSTALL.md).
 
 ### Build from source
 
