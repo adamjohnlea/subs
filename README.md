@@ -1,5 +1,9 @@
 # subs
 
+[![Latest release](https://img.shields.io/github/v/release/adamjohnlea/subs?label=release&sort=semver)](https://github.com/adamjohnlea/subs/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20Silicon-lightgrey)](https://github.com/adamjohnlea/subs/releases/latest)
+
 Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
 
 v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done.
@@ -8,11 +12,11 @@ v1 is pick-and-go: point it at a subtitle file or a folder, pick your target lan
 
 - An Apple Silicon Mac. The on-device translation models are built for Apple Silicon.
 - macOS 26 or newer. (Built and tested on macOS 27.)
-- Xcode 26 or later, which includes the Swift 6.4 toolchain. A standalone Swift 6.4+ toolchain from [swift.org](https://www.swift.org/install/macos/) also works. Check with:
+- Only if building from source: Xcode 26 or later, which includes the Swift 6.4 toolchain. A standalone Swift 6.4+ toolchain from [swift.org](https://www.swift.org/install/macos/) also works. Check with:
   ```bash
   swift --version
   ```
-  You want Swift 6.4 or newer.
+  You want Swift 6.4 or newer. The downloaded installer needs none of this.
 - At least one English translation language pack installed (see the next section). subs only offers languages you already have.
 
 ## Install a translation language pack
@@ -36,15 +40,27 @@ If no packs are installed when you launch subs, it tells you so and points you b
 
 ## Get it and run it
 
-The repository is private, so you'll need access to clone it.
+### Download the installer (easiest)
+
+Grab the latest signed, notarized installer from the [releases page](https://github.com/adamjohnlea/subs/releases/latest):
+
+1. Download `subs-vX.Y.Z.pkg`.
+2. Double-click it. It installs `subs` into `/usr/local/bin`.
+3. Open a terminal and run `subs`.
+
+It's signed with a Developer ID and notarized by Apple, so it runs with no Gatekeeper warnings and needs no Xcode or Swift toolchain. All you need is an Apple Silicon Mac on macOS 26+ with at least one language pack installed (above).
+
+### Build from source
+
+If you'd rather build it yourself, or want to hack on it, you'll need the Swift toolchain from Requirements above.
 
 ```bash
-git clone git@github.com:adamjohnlea/subs.git
+git clone https://github.com/adamjohnlea/subs.git
 cd subs
 swift run subs
 ```
 
-(HTTPS also works: `git clone https://github.com/adamjohnlea/subs.git`.)
+(SSH also works: `git clone git@github.com:adamjohnlea/subs.git`.)
 
 The first `swift run` fetches the one dependency (SwiftTUI 0.15.1) and compiles everything, so it's slower than later runs. After that, `swift run subs` starts in a second or two.
 
@@ -130,6 +146,8 @@ swift build      # build
 swift test       # run the unit tests
 swift run subs   # launch the app
 ```
+
+A `Makefile` wraps the common tasks (`make build`, `make test`, `make run`). It also builds the distributable: `make zip` produces a raw binary to hand to someone directly, and `make dist` produces the signed, notarized `.pkg` that ships on the releases page (it needs an Apple Developer ID; see the config at the top of the Makefile). Run `make help` for the full list.
 
 The project is two targets with a deliberate seam:
 
