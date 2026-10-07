@@ -25,6 +25,12 @@ Double-click it and follow the prompts. It installs `subs` to
 subs
 ```
 
+**Why does it ask for my password?** The installer is copying `subs` into a
+protected system folder, so macOS asks for your Mac login password once,
+during install. That's the operating system guarding the folder, not `subs`
+doing anything online. The app itself never asks for a login, API key, or
+account. Once it's installed, just run `subs` (no `sudo`, no password).
+
 ### If you got a `.zip`
 
 The binary isn't signed by Apple, so macOS quarantines it on download. Unzip
