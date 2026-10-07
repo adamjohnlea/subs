@@ -13,15 +13,26 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Select newest Xcode
+      - name: Build and test (Swift 6.4 via swiftly)
         run: |
-          latest=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
-          echo "Selecting $latest"
-          sudo xcode-select -s "$latest"
+          set -eux
+
+          # GitHub's macos-26 image tops out at Swift 6.3.3 (Xcode 26.6),
+          # but this package requires 6.4, so install that toolchain with
+          # swiftly. It builds against the macOS 26 SDK from the default Xcode.
+          curl -L https://download.swift.org/swiftly/darwin/swiftly.pkg > swiftly.pkg
+          installer -pkg swiftly.pkg -target CurrentUserHomeDirectory
+
+          SWIFTLY_BIN="$(find "$HOME" -type f -name swiftly -path '*bin*' | head -1)"
+          "$SWIFTLY_BIN" init --verbose --assume-yes --skip-install --no-modify-profile
+
+          ENV_FILE="$(find "$HOME" -name env.sh -path '*swiftly*' | head -1)"
+          . "$ENV_FILE"
+
+          swiftly install --use 6.4 --assume-yes --post-install-file=post-install.sh
+          if [ -f post-install.sh ]; then . post-install.sh; fi
+          hash -r
+
           swift --version
-
-      - name: Build
-        run: swift build
-
-      - name: Test
-        run: swift test
+          swift build
+          swift test
