@@ -163,7 +163,8 @@ Contributions are welcome. The fork-and-pull-request flow, the pre-PR checklist 
 ## Roadmap
 
 - A workbench view: English and translation side by side, with per-cue editing and re-running.
-- Moving the translator to Apple's batch translation API for more speed on large files.
+
+Translating each file in a single batch call (for more speed on large files) shipped in [v0.1.1](https://github.com/adamjohnlea/subs/releases/tag/v0.1.1).
 
 ## License
 
