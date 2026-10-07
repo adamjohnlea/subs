@@ -16,39 +16,62 @@ keys, no accounts.
 
 ## Install
 
-### If you got a `.pkg`
+`subs` is a **terminal command, not an app you double-click.** You run it by
+typing its name in Terminal (see below), not from Finder and not with
+`open -a subs` (that only works for `.app` bundles and will say it can't find
+it).
 
-Double-click it and follow the prompts. It installs `subs` to
-`/usr/local/bin`, so you can then run it from any terminal:
+### Easiest: the `.pkg` installer (recommended)
+
+Double-click `subs-vX.Y.Z.pkg` and follow the prompts. macOS asks for your
+Mac login password once during install (in a normal dialog box, where you can
+see it accepting what you type). Then open Terminal and run it from anywhere:
 
 ```
 subs
 ```
 
 **Why does it ask for my password?** The installer is copying `subs` into a
-protected system folder, so macOS asks for your Mac login password once,
-during install. That's the operating system guarding the folder, not `subs`
-doing anything online. The app itself never asks for a login, API key, or
-account. Once it's installed, just run `subs` (no `sudo`, no password).
+protected system folder (`/usr/local/bin`), so macOS asks for your Mac login
+password once, during install. That's the operating system guarding the
+folder, not `subs` doing anything online. The app itself never asks for a
+login, API key, or account. Once it's installed, just run `subs` — no `sudo`,
+no password.
 
-### If you got a `.zip`
+### Alternative: a raw binary (`.zip`)
 
-The binary isn't signed by Apple, so macOS quarantines it on download. Unzip
-it, then clear the quarantine flag once:
+If you got a `.zip` instead of a `.pkg`, you don't have to install anything —
+you can run it right where it is. Unzip it, then in Terminal go to that folder
+and run it:
 
 ```
-unzip subs-*-arm64.zip
+cd ~/Downloads        # wherever you unzipped it
+./subs
+```
+
+The binary isn't signed by Apple, so the first time macOS may say the
+developer can't be verified. Clear that once, then run it again:
+
+```
 xattr -d com.apple.quarantine ./subs
 ./subs
 ```
 
 (Or: right-click the file in Finder → Open the first time, and confirm.)
 
-To run it from anywhere, move it onto your PATH:
+That's enough to use it — `./subs` from its folder needs no admin password.
+Only if you want to type plain `subs` from any folder do you move it onto your
+PATH, which needs an administrator account:
 
 ```
 sudo mv ./subs /usr/local/bin/subs
 ```
+
+**Note:** when Terminal asks for a password (for `sudo`), nothing shows as you
+type — no dots, no stars. It is taking it; type it and press Return. If it
+keeps saying "Sorry, try again," check Caps Lock, or your account may not be
+an administrator — in that case skip the move and just run `./subs` from its
+folder, or use the `.pkg` installer above.
 
 ## Using it
 
