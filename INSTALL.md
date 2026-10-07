@@ -93,3 +93,18 @@ touches timestamps — only the subtitle text is translated.
 
 It means that pack isn't installed yet. Add it in System Settings (see above),
 then restart `subs`.
+
+## If it won't launch (crashes immediately)
+
+If running `subs` aborts right away with a `dyld` error mentioning
+`Library not loaded` or **"built for macOS 26.0 which is newer than running
+OS,"** your Mac is on a macOS older than 26. subs is built against macOS 26
+and relies on Apple's on-device Translation framework, which only exists on
+**macOS 26 (Tahoe) or later** — so it can't run on an earlier version. Update
+macOS to 26+ (if your Mac supports it) and try again. If the Mac can't run
+Tahoe, or it's an Intel Mac, subs won't run on it. Check what you're on with:
+
+```
+sw_vers -productVersion    # need 26.x or later
+uname -m                   # arm64 = Apple Silicon (required)
+```

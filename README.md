@@ -8,6 +8,8 @@ Translate English `.srt` subtitle files into other languages, entirely on your M
 
 v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done.
 
+> **Before you download:** subs needs **macOS 26 (Tahoe) or newer, on an Apple Silicon Mac.** On an older macOS it won't launch — it aborts at startup with a `dyld` error like *"built for macOS 26.0 which is newer than running OS."* That's not a bug; the on-device translation it relies on only exists on macOS 26+. If you're on an older version, update to Tahoe first (or it can't run on that Mac).
+
 ## Requirements
 
 - An Apple Silicon Mac. The on-device translation models are built for Apple Silicon.
