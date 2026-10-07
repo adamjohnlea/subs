@@ -16,8 +16,11 @@ VERSION       := $(shell git describe --tags --always 2>/dev/null || echo 0.1.0)
 
 # Fill these in once you have your certs (see the setup notes).
 # Find the exact strings with:  security find-identity -v
-DEV_ID_APP       ?= Developer ID Application: Adam Lea (S927NCGL3V)
-DEV_ID_INSTALLER ?= Developer ID Installer: Adam Lea (S927NCGL3V)
+# Using SHA-1 hashes here instead of names because there are two
+# "Developer ID Application: Adam Lea (S927NCGL3V)" certs in the keychain
+# (an old duplicate), which makes the name ambiguous to codesign.
+DEV_ID_APP       ?= C8CA34B45BDBBD92460EDEF25A7FC0575870EB4B
+DEV_ID_INSTALLER ?= AA47F474595D2BBB8B6D65B54D8A56613E3D3630
 # notarytool keychain profile name you created with `notarytool store-credentials`
 NOTARY_PROFILE   ?= subs-notary
 
