@@ -13,8 +13,12 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Swift version
-        run: swift --version
+      - name: Select newest Xcode
+        run: |
+          latest=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Selecting $latest"
+          sudo xcode-select -s "$latest"
+          swift --version
 
       - name: Build
         run: swift build
