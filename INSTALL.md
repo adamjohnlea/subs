@@ -84,8 +84,9 @@ folder, or use the `.pkg` installer above.
 
 ## Using it
 
-Run `subs`, point it at a `.srt` file or a folder of them, pick your target
-languages from the list, and let it go. It writes a new file per language
+Run `subs`, point it at a `.srt` file or a folder of them — type the path,
+paste it, or drag the file or folder from Finder into the terminal — pick your
+target languages from the list, and let it go. It writes a new file per language
 next to the original (for example `movie.srt` → `movie.es.srt`) and never
 touches timestamps — only the subtitle text is translated.
 

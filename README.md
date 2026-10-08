@@ -78,7 +78,7 @@ subs walks you through four screens. A step tracker across the top (`● Choose 
 
 ### 1. Choose input
 
-Type or paste a path to either a single `.srt` file or a folder that contains `.srt` files. `~` is expanded, so `~/Movies/Arrival/Arrival.en.srt` works.
+Type or paste a path to a single `.srt` file or a folder of `.srt` files, or just drag the file or folder from Finder into the terminal. `~` is expanded, and paths with spaces work whether they're quoted or backslash-escaped (the way the terminal writes a dragged path), so `~/Movies/Arrival.en.srt` and a dragged `~/Courses/LUMINOR\ -\ Create\ a\ Camera` folder both work.
 
 Press Return (or select Continue) to validate. subs checks that it can find at least one subtitle file and reads which target languages you have installed. If the path is empty, wrong, or has no `.srt` files, the reason shows in red inside the card, and you stay on this screen.
 
