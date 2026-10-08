@@ -95,3 +95,23 @@ private func sampleOutcomes() -> [JobOutcome] {
     // A real backslash in a name drags in as `\\`; unescaping gives one back.
     #expect(normalizedInputPath(#"/Users/a/odd\\name"#) == #"/Users/a/odd\name"#)
 }
+
+@Test func activityLinesShowNewestFirst() {
+    let lines = activityLines(["a.srt → Spanish", "b.srt → Spanish", "c.srt → Spanish"])
+    #expect(lines.map(\.text) == ["c.srt → Spanish", "b.srt → Spanish", "a.srt → Spanish"])
+}
+
+@Test func activityLinesKeepStableCompletionOrderIDs() {
+    // The id is the append (completion) order, not the display position, so a
+    // row's identity is unchanged when a newer row is inserted above it.
+    let three = activityLines(["a", "b", "c"])
+    #expect(three.map(\.id) == [2, 1, 0])
+    // A fourth completes: the first three keep the ids they had.
+    let four = activityLines(["a", "b", "c", "d"])
+    #expect(four.first?.id == 3)
+    #expect(four.first(where: { $0.text == "a" })?.id == 0)
+}
+
+@Test func activityLinesEmptyLogIsEmpty() {
+    #expect(activityLines([]).isEmpty)
+}

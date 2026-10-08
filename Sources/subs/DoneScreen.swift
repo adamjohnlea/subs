@@ -12,17 +12,24 @@ struct DoneScreen: View {
         return VStack(alignment: .leading, spacing: 1) {
             CompactHeader(step: .done)
             VStack(alignment: .leading, spacing: 1) {
-                ForEach(rows) { row in
-                    if row.kind == .success {
-                        Text("✓ \(row.primary)").foregroundStyle(.success)
-                    } else {
-                        HStack(spacing: 1) {
-                            Text("✗ \(row.primary)").foregroundStyle(.danger)
-                            Text("  \(row.code ?? "")  ").foregroundStyle(.secondary)
-                            Text(row.reason ?? "failed").foregroundStyle(.danger)
+                // Results scroll inside a fixed-height box so a long run doesn't
+                // push the summary and "Translate more" button off-screen.
+                ScrollView(.vertical) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        ForEach(rows) { row in
+                            if row.kind == .success {
+                                Text("✓ \(row.primary)").foregroundStyle(.success)
+                            } else {
+                                HStack(spacing: 1) {
+                                    Text("✗ \(row.primary)").foregroundStyle(.danger)
+                                    Text("  \(row.code ?? "")  ").foregroundStyle(.secondary)
+                                    Text(row.reason ?? "failed").foregroundStyle(.danger)
+                                }
+                            }
                         }
                     }
                 }
+                .frame(height: activityBoxHeight)
                 HStack(spacing: 1) {
                     Text("\(summary.written) written").foregroundStyle(.success)
                     Text(" · ").foregroundStyle(.secondary)

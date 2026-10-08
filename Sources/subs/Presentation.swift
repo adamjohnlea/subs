@@ -100,6 +100,28 @@ func doneSummary(_ outcomes: [JobOutcome]) -> DoneSummary {
     return DoneSummary(written: written, failed: outcomes.count - written, outputFolder: folder)
 }
 
+/// Row height of the scroll boxes that hold the run screen's live activity list
+/// and the done screen's results list. Fixed so those cards stay a constant size
+/// and their lists scroll within them rather than growing and clipping.
+let activityBoxHeight = 16
+
+/// One row in the run screen's completed-translation list: the text to show and
+/// a stable identity. The id is the order the unit finished in, so a row keeps
+/// its identity as newer rows are inserted above it — the list reorders without
+/// re-rendering rows that have already settled.
+struct ActivityLine: Equatable, Identifiable {
+    let id: Int
+    let text: String
+}
+
+/// The completed units as display rows, most recently finished first, so the
+/// newest translation is always at the top of the scrollable list. `log` is the
+/// append-ordered progress log (oldest first); the id preserves that completion
+/// order while the display order is reversed.
+func activityLines(_ log: [String]) -> [ActivityLine] {
+    log.enumerated().reversed().map { ActivityLine(id: $0.offset, text: $0.element) }
+}
+
 /// Normalizes a path as it arrives from the input field, undoing the escaping a
 /// terminal applies when a file or folder is dragged in or a path is pasted.
 ///

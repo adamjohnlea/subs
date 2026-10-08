@@ -24,9 +24,16 @@ struct RunScreen: View {
                     ProgressView(value: line.fraction)
                         .tint(Theme.accent)
                     Text("\(line.percentText)   \(line.countText)").foregroundStyle(.secondary)
-                    ForEach(Array(model.progressLog.enumerated()), id: \.offset) { _, entry in
-                        Text("✓ \(entry)").foregroundStyle(.success)
+                    // Completed units, newest first, in a fixed-height box that
+                    // scrolls instead of growing the card as the list fills.
+                    ScrollView(.vertical) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            ForEach(activityLines(model.progressLog), id: \.id) { line in
+                                Text("✓ \(line.text)").foregroundStyle(.success)
+                            }
+                        }
                     }
+                    .frame(height: activityBoxHeight)
                 } else {
                     HStack(spacing: 1) {
                         Spinner()
