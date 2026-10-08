@@ -40,11 +40,14 @@ struct InputScreen: View {
     /// `model.errorMessage` and stays on this screen.
     private func advance() async {
         model.errorMessage = nil
-        guard !model.inputPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        // Undo terminal drag/paste escaping (backslash-escaped spaces, quotes)
+        // before the string becomes a file URL.
+        let path = normalizedInputPath(model.inputPath)
+        guard !path.isEmpty else {
             model.errorMessage = "Enter a file or folder path."
             return
         }
-        let url = URL(fileURLWithPath: (model.inputPath as NSString).expandingTildeInPath)
+        let url = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
         do {
             let files = try FileDiscovery().srtFiles(at: url)
             let targets = await SystemLanguageAvailability()

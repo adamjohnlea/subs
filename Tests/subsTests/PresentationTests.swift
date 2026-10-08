@@ -62,3 +62,36 @@ private func sampleOutcomes() -> [JobOutcome] {
     #expect(s.failed == 1)
     #expect(s.outputFolder == "/m")
 }
+
+@Test func normalizedInputPathUnescapesDraggedSpaces() {
+    // What macOS Terminal produces when you drag a file with spaces in.
+    let dragged = #"/Users/a/Desktop/captions/LUMINOR-\ Create\ a\ Vintage\ Camera\ with\ Blender"#
+    #expect(normalizedInputPath(dragged) == "/Users/a/Desktop/captions/LUMINOR- Create a Vintage Camera with Blender")
+}
+
+@Test func normalizedInputPathLeavesPlainPathUnchanged() {
+    #expect(normalizedInputPath("/Users/a/Movies/clip.srt") == "/Users/a/Movies/clip.srt")
+    #expect(normalizedInputPath("~/Desktop/captions") == "~/Desktop/captions")
+}
+
+@Test func normalizedInputPathTrimsSurroundingWhitespace() {
+    // A drag often leaves a trailing space after the escaped path.
+    #expect(normalizedInputPath("  /Users/a/clip.srt  ") == "/Users/a/clip.srt")
+    #expect(normalizedInputPath(#"/Users/a/My\ Clips "#) == "/Users/a/My Clips")
+}
+
+@Test func normalizedInputPathStripsDoubleQuotes() {
+    #expect(normalizedInputPath(#""/Users/a/My Clips/clip.srt""#) == "/Users/a/My Clips/clip.srt")
+}
+
+@Test func normalizedInputPathStripsSingleQuotesLiterally() {
+    // Inside single quotes the shell keeps backslashes literal, so a
+    // single-quoted path is only unquoted, never unescaped.
+    #expect(normalizedInputPath("'/Users/a/My Clips/clip.srt'") == "/Users/a/My Clips/clip.srt")
+    #expect(normalizedInputPath(#"'/Users/a/odd\name'"#) == #"/Users/a/odd\name"#)
+}
+
+@Test func normalizedInputPathKeepsEscapedBackslash() {
+    // A real backslash in a name drags in as `\\`; unescaping gives one back.
+    #expect(normalizedInputPath(#"/Users/a/odd\\name"#) == #"/Users/a/odd\name"#)
+}

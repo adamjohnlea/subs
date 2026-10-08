@@ -99,3 +99,52 @@ func doneSummary(_ outcomes: [JobOutcome]) -> DoneSummary {
     let folder = outcomes.compactMap { $0.output?.deletingLastPathComponent().path }.first
     return DoneSummary(written: written, failed: outcomes.count - written, outputFolder: folder)
 }
+
+/// Normalizes a path as it arrives from the input field, undoing the escaping a
+/// terminal applies when a file or folder is dragged in or a path is pasted.
+///
+/// Dragging onto Terminal or iTerm escapes spaces and other shell
+/// metacharacters with backslashes (`.../LUMINOR-\ Create\ a\ Camera`), and
+/// some shells or apps wrap the whole path in single or double quotes. Both are
+/// literal characters in the field, so feeding the raw string to
+/// `URL(fileURLWithPath:)` looks for a name that still contains the backslashes
+/// or quotes and fails. This returns the real on-disk path.
+///
+/// The rules follow POSIX shell quoting closely enough for a dropped path:
+/// surrounding whitespace is trimmed; one layer of matching surrounding quotes
+/// is removed; and backslash escapes (`\x` -> `x`) are undone on anything that
+/// was not single-quoted (inside single quotes the shell keeps backslashes
+/// literal). A hand-typed path with no backslashes or quotes passes through
+/// unchanged.
+func normalizedInputPath(_ raw: String) -> String {
+    let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    if trimmed.count >= 2, let first = trimmed.first, let last = trimmed.last {
+        if first == "'" && last == "'" {
+            // Single quotes: contents are fully literal, so just unquote.
+            return String(trimmed.dropFirst().dropLast())
+        }
+        if first == "\"" && last == "\"" {
+            return unescapingShellBackslashes(String(trimmed.dropFirst().dropLast()))
+        }
+    }
+    return unescapingShellBackslashes(trimmed)
+}
+
+/// Drops shell backslash escapes: each backslash is removed and the following
+/// character kept literally (`\ ` -> space, `\\` -> `\`). A trailing lone
+/// backslash is dropped.
+private func unescapingShellBackslashes(_ s: String) -> String {
+    var result = ""
+    result.reserveCapacity(s.count)
+    var iterator = s.makeIterator()
+    while let character = iterator.next() {
+        if character == "\\" {
+            if let escaped = iterator.next() {
+                result.append(escaped)
+            }
+        } else {
+            result.append(character)
+        }
+    }
+    return result
+}
