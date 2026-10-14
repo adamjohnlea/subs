@@ -75,20 +75,33 @@ public struct AppleTranscriber: Transcribing {
                         let last = words.removeLast()
                         words.append(TranscribedWord(text: last.text + token, start: last.start, end: last.end))
                     }
-                    if duration > 0 {
-                        progress(.transcribing(fraction: min(1, (timeRange?.end.seconds ?? 0) / duration)))
+                    if duration > 0, let timeRange {
+                        progress(.transcribing(fraction: min(1, timeRange.end.seconds / duration)))
                     }
                 }
             }
             return words
         }
 
-        if let last = try await analyzer.analyzeSequence(from: audioFile) {
-            try await analyzer.finalizeAndFinish(through: last)
-        } else {
-            await analyzer.cancelAndFinishNow()
+        // Cancelling the task does not stop the analyzer or the collector by itself, so a cancel ends
+        // both, and every exit path below cancels the collector so it never outlives this call.
+        do {
+            return try await withTaskCancellationHandler {
+                if let last = try await analyzer.analyzeSequence(from: audioFile) {
+                    try await analyzer.finalizeAndFinish(through: last)
+                } else {
+                    await analyzer.cancelAndFinishNow()
+                }
+                try Task.checkCancellation()
+                return try await collector.value
+            } onCancel: {
+                collector.cancel()
+                Task { await analyzer.cancelAndFinishNow() }
+            }
+        } catch {
+            collector.cancel()
+            throw Task.isCancelled ? CancellationError() : error
         }
-        return try await collector.value
     }
 
     /// Exports the asset's audio to an `.m4a` file, since `AVAudioFile` cannot read a video container.
