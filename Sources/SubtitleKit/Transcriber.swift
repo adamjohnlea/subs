@@ -11,7 +11,7 @@ public enum TranscriptionStage: Equatable, Sendable {
 }
 
 /// Errors raised while transcribing a video.
-public enum TranscriberError: Error, Equatable {
+public enum TranscriberError: Error, Equatable, CustomStringConvertible {
     /// On-device transcription is not available on this Mac.
     case unavailable
     /// The file has no audio track to transcribe.
@@ -22,6 +22,23 @@ public enum TranscriberError: Error, Equatable {
     case modelReservationFull(held: [String])
     /// The audio could not be extracted from the file for transcription.
     case audioExtractionFailed
+
+    /// A plain-language message suitable for showing to the user.
+    public var description: String {
+        switch self {
+        case .unavailable:
+            return "Transcription isn't available on this Mac."
+        case .noAudioTrack:
+            return "This file has no audio to transcribe."
+        case .noSpeechFound:
+            return "No speech found in this video."
+        case .audioExtractionFailed:
+            return "Couldn't extract audio from this video."
+        case .modelReservationFull(let held):
+            return "This Mac can keep speech models for only a few languages, and they're all in use: "
+                + "\(held.joined(separator: ", ")). Free one in System Settings to transcribe."
+        }
+    }
 }
 
 /// Transcribes a video's speech into timed words.
@@ -109,7 +126,13 @@ public struct AppleTranscriber: Transcribing {
         guard let session = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
             throw TranscriberError.audioExtractionFailed
         }
-        try await session.export(to: url, as: .m4a)
+        do {
+            try await session.export(to: url, as: .m4a)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw TranscriberError.audioExtractionFailed
+        }
     }
 
     /// Downloads and installs the English model if it is not already on this Mac,
