@@ -14,4 +14,10 @@ public enum OutputPath {
         let name = "\(stem).\(languageCode).\(ext)"
         return directory.appendingPathComponent(name)
     }
+
+    /// The English transcript's URL: the video's path with its extension swapped
+    /// for `.srt` (`/movies/film.mp4` -> `/movies/film.srt`).
+    public static func transcriptURL(forVideo video: URL) -> URL {
+        video.deletingPathExtension().appendingPathExtension("srt")
+    }
 }
