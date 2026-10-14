@@ -10,7 +10,7 @@ struct RunScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            CompactHeader(step: .translate)
+            CompactHeader(step: .translate, includeTranscribe: model.isVideoFlow)
             VStack(alignment: .leading, spacing: 1) {
                 if let progress = model.progress {
                     let line = progressLine(completedUnits: progress.completedUnits,

@@ -14,7 +14,7 @@ struct RootView: View {
     private var currentScreen: some View {
         switch model.screen {
         case .input:     InputScreen(model: model)
-        case .transcribing: Text("Transcribing…")  // TEMPORARY placeholder; Task 7 replaces with TranscribeScreen
+        case .transcribing: TranscribeScreen(model: model)
         case .languages: LanguageScreen(model: model)
         case .running:   RunScreen(model: model)
         case .done:      DoneScreen(model: model)

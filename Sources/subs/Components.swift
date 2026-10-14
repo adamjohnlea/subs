@@ -12,9 +12,10 @@ struct Wordmark: View {
 /// foreground label; the rest are muted open dots and muted labels.
 struct StepTracker: View {
     let active: Step
+    var includeTranscribe: Bool = false
     var body: some View {
         HStack(spacing: 1) {
-            ForEach(Array(stepItems(active: active).enumerated()), id: \.offset) { _, item in
+            ForEach(Array(stepItems(active: active, includeTranscribe: includeTranscribe).enumerated()), id: \.offset) { _, item in
                 Text(item.isActive ? "● " : "○ ")
                     .foregroundStyle(item.isActive ? AnyShapeStyle(Theme.accent)
                                                     : AnyShapeStyle(.secondary))
@@ -30,11 +31,12 @@ struct StepTracker: View {
 /// step tracker.
 struct CompactHeader: View {
     let step: Step
+    var includeTranscribe: Bool = false
     var body: some View {
         HStack(spacing: 1) {
             Text("subs").foregroundStyle(Theme.accent).bold()
             Text(" ▸  ").foregroundStyle(.secondary)
-            StepTracker(active: step)
+            StepTracker(active: step, includeTranscribe: includeTranscribe)
         }
     }
 }

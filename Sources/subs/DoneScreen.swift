@@ -10,7 +10,7 @@ struct DoneScreen: View {
         let rows = doneRows(model.outcomes)
         let summary = doneSummary(model.outcomes)
         return VStack(alignment: .leading, spacing: 1) {
-            CompactHeader(step: .done)
+            CompactHeader(step: .done, includeTranscribe: model.isVideoFlow)
             VStack(alignment: .leading, spacing: 1) {
                 // Results scroll inside a fixed-height box so a long run doesn't
                 // push the summary and "Translate more" button off-screen.
