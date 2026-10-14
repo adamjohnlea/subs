@@ -80,6 +80,8 @@ subs walks you through four screens. A step tracker across the top (`● Choose 
 
 Type or paste a path to a single `.srt` file or a folder of `.srt` files, or just drag the file or folder from Finder into the terminal. A folder is searched recursively, so a folder of subfolders (for example a course with one subfolder per module) is handled in a single run; each translated file is written next to its source. `~` is expanded, and paths with spaces work whether they're quoted or backslash-escaped (the way the terminal writes a dragged path), so `~/Movies/Arrival.en.srt` and a dragged `~/Courses/LUMINOR\ -\ Create\ a\ Camera` folder both work.
 
+You can also give it a single video file instead, such as an `.mp4` or `.mov`. subs transcribes the speech into an English `.srt` on your Mac, using Apple's on-device speech recognition. The first time, it downloads the English speech model if your Mac doesn't have it yet. Once the transcript is ready, subs offers to translate it, the same as any subtitle file. The English transcript is written next to the video as `film.srt` (for `film.mp4`) and reused on later runs, so if one already exists, subs uses it as is. That also means you can hand-correct the transcript and run again. Video input is one file at a time for now; folders are still searched for `.srt` files only.
+
 Press Return (or select Continue) to validate. subs checks that it can find at least one subtitle file and reads which target languages you have installed. If the path is empty, wrong, or has no `.srt` files, the reason shows in red inside the card, and you stay on this screen.
 
 ### 2. Languages
@@ -140,7 +142,7 @@ You'll only see the ones whose English pack is downloaded on your Mac.
 Stated plainly so there are no surprises:
 
 - It can't download language packs for you. That's gated by Apple's system window, so you install packs once in System Settings (above).
-- It handles `.srt` only. Other subtitle formats aren't supported.
+- Subtitle input is `.srt` only. Other subtitle formats aren't supported. A video file is transcribed to English `.srt` first (see Choose input).
 - Inline formatting tags (`<i>`, `{\an8}`) and multi-line cues are best effort. Translation can reorder or drop them. Timestamps are always preserved; tag fidelity is not guaranteed.
 - Progress is reported per unit (file times language), not per subtitle line.
 - Re-running a folder is safe: files that already carry a target-language suffix (`Arrival.es.srt`) are skipped during folder discovery, so outputs aren't re-translated into `Arrival.es.es.srt`. A file you point at directly is always translated, even if its name ends that way.
