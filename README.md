@@ -78,7 +78,7 @@ subs walks you through four screens. A step tracker across the top (`● Choose 
 
 ### 1. Choose input
 
-Type or paste a path to a single `.srt` file or a folder of `.srt` files, or just drag the file or folder from Finder into the terminal. `~` is expanded, and paths with spaces work whether they're quoted or backslash-escaped (the way the terminal writes a dragged path), so `~/Movies/Arrival.en.srt` and a dragged `~/Courses/LUMINOR\ -\ Create\ a\ Camera` folder both work.
+Type or paste a path to a single `.srt` file or a folder of `.srt` files, or just drag the file or folder from Finder into the terminal. A folder is searched recursively, so a folder of subfolders (for example a course with one subfolder per module) is handled in a single run; each translated file is written next to its source. `~` is expanded, and paths with spaces work whether they're quoted or backslash-escaped (the way the terminal writes a dragged path), so `~/Movies/Arrival.en.srt` and a dragged `~/Courses/LUMINOR\ -\ Create\ a\ Camera` folder both work.
 
 Press Return (or select Continue) to validate. subs checks that it can find at least one subtitle file and reads which target languages you have installed. If the path is empty, wrong, or has no `.srt` files, the reason shows in red inside the card, and you stay on this screen.
 
@@ -143,7 +143,7 @@ Stated plainly so there are no surprises:
 - It handles `.srt` only. Other subtitle formats aren't supported.
 - Inline formatting tags (`<i>`, `{\an8}`) and multi-line cues are best effort. Translation can reorder or drop them. Timestamps are always preserved; tag fidelity is not guaranteed.
 - Progress is reported per unit (file times language), not per subtitle line.
-- Pointing it at a folder that already contains translated output will re-translate those outputs too (`Arrival.es.srt` becomes `Arrival.es.es.srt`). Translate into a clean folder, or remove earlier outputs first.
+- Re-running a folder is safe: files that already carry a target-language suffix (`Arrival.es.srt`) are skipped during folder discovery, so outputs aren't re-translated into `Arrival.es.es.srt`. A file you point at directly is always translated, even if its name ends that way.
 
 ## Development
 
