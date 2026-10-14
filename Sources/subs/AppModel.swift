@@ -58,4 +58,22 @@ final class AppModel {
 
     /// A message to surface to the user when something goes wrong.
     var errorMessage: String?
+
+    /// Clears all input, run, and video state and returns to the Choose-input
+    /// screen, so the next run starts fresh. Used by "Translate more" on the
+    /// done screen; a leftover path or video flow must not carry into a new run.
+    func startOver() {
+        inputPath = ""
+        videoURL = nil
+        transcriptionStage = nil
+        isVideoFlow = false
+        discoveredFiles = []
+        availableTargets = []
+        selectedTargets = []
+        progress = nil
+        progressLog = []
+        outcomes = []
+        errorMessage = nil
+        screen = .input
+    }
 }

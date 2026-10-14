@@ -3,6 +3,37 @@ import Foundation
 @testable import subs
 @testable import SubtitleKit
 
+@MainActor
+@Test func startOverClearsAllStateAndReturnsToInput() {
+    let es = TargetLanguage(code: "es", displayName: "Spanish")
+    let model = AppModel()
+    model.inputPath = "/some/video.mp4"
+    model.videoURL = URL(fileURLWithPath: "/some/video.mp4")
+    model.transcriptionStage = .transcribing(fraction: 0.5)
+    model.isVideoFlow = true
+    model.discoveredFiles = [URL(fileURLWithPath: "/some/video.srt")]
+    model.availableTargets = [es]
+    model.selectedTargets = [es]
+    model.progressLog = ["film.srt → Spanish"]
+    model.errorMessage = "boom"
+    model.screen = .done
+
+    model.startOver()
+
+    #expect(model.inputPath == "")
+    #expect(model.videoURL == nil)
+    #expect(model.transcriptionStage == nil)
+    #expect(model.isVideoFlow == false)
+    #expect(model.discoveredFiles.isEmpty)
+    #expect(model.availableTargets.isEmpty)
+    #expect(model.selectedTargets.isEmpty)
+    #expect(model.progress == nil)
+    #expect(model.progressLog.isEmpty)
+    #expect(model.outcomes.isEmpty)
+    #expect(model.errorMessage == nil)
+    #expect(model.screen == .input)
+}
+
 @Test func stepItemsHasFourEntriesForSubtitleFlow() {
     let items = stepItems(active: .translate, includeTranscribe: false)
     #expect(items.count == 4)
