@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import SubtitleKit
 
-/// The whole app is a four-screen state machine. `AppModel` owns the screen
+/// The whole app is a five-screen state machine. `AppModel` owns the screen
 /// the user is on and every field the screens read and write, so the screen
 /// views stay thin and share one source of truth.
 ///
@@ -16,6 +16,7 @@ final class AppModel {
     /// The screens the app moves through, in order.
     enum Screen: Equatable {
         case input
+        case transcribing
         case languages
         case running
         case done
@@ -26,6 +27,15 @@ final class AppModel {
 
     /// The path the user typed on the input screen (a file or a directory).
     var inputPath: String = ""
+
+    /// The video to transcribe, set when the input is a video rather than a subtitle file.
+    var videoURL: URL?
+
+    /// The current transcription stage, or `nil` before it starts.
+    var transcriptionStage: TranscriptionStage?
+
+    /// Whether this run began from a video (so the Transcribe step is shown).
+    var isVideoFlow: Bool = false
 
     /// The `.srt` files discovered under `inputPath`.
     var discoveredFiles: [URL] = []

@@ -1,14 +1,15 @@
 import Foundation
 import SubtitleKit
 
-/// The four screens the app moves through, as an ordered, labeled sequence for
-/// the step tracker. Distinct from `AppModel.Screen`, which drives routing.
+/// The steps the app moves through, as an ordered, labeled sequence for the
+/// step tracker. Distinct from `AppModel.Screen`, which drives routing.
 enum Step: Int, CaseIterable {
-    case input, languages, translate, done
+    case input, transcribe, languages, translate, done
 
     var label: String {
         switch self {
         case .input: return "Choose input"
+        case .transcribe: return "Transcribe"
         case .languages: return "Languages"
         case .translate: return "Translate"
         case .done: return "Done"
@@ -22,9 +23,12 @@ struct StepItem: Equatable {
     let isActive: Bool
 }
 
-/// The four step-tracker entries, with `active` marked.
-func stepItems(active: Step) -> [StepItem] {
-    Step.allCases.map { StepItem(label: $0.label, isActive: $0 == active) }
+/// The step-tracker entries, with `active` marked. The Transcribe step is shown
+/// only for a video flow; subtitle-file runs omit it.
+func stepItems(active: Step, includeTranscribe: Bool = false) -> [StepItem] {
+    Step.allCases
+        .filter { includeTranscribe || $0 != .transcribe }
+        .map { StepItem(label: $0.label, isActive: $0 == active) }
 }
 
 extension AppModel.Screen {
@@ -32,11 +36,21 @@ extension AppModel.Screen {
     var step: Step {
         switch self {
         case .input: return .input
+        case .transcribing: return .transcribe
         case .languages: return .languages
         case .running: return .translate
         case .done: return .done
         }
     }
+}
+
+/// Whether a chosen input path is a subtitle input (an `.srt` file or a folder,
+/// handled by the existing pipeline) or a video to transcribe.
+enum InputKind: Equatable { case subtitles, video }
+
+func inputKind(forExtension ext: String, isDirectory: Bool) -> InputKind {
+    if isDirectory { return .subtitles }
+    return ext.lowercased() == "srt" ? .subtitles : .video
 }
 
 /// The pieces the run screen needs to draw progress: a 0...1 fraction for the
