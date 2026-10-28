@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20Silicon-lightgrey)](https://github.com/adamjohnlea/subs/releases/latest)
 
+![The subs Languages screen: a checklist of installed translation languages with Spanish and Portuguese selected, a step tracker across the top (Choose input, Languages, Translate, Done), and a key-hints line at the bottom.](docs/hero.png)
+
 Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
 
 v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done.
