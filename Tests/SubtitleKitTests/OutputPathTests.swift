@@ -18,3 +18,9 @@ import Testing
     let video = URL(fileURLWithPath: "/movies/film.mp4")
     #expect(OutputPath.transcriptURL(forVideo: video).path == "/movies/film.srt")
 }
+
+@Test func correctionSiblingsSitNextToTranscript() {
+    let transcript = URL(fileURLWithPath: "/movies/My Film.srt")
+    #expect(OutputPath.originalTranscriptURL(forTranscript: transcript).path == "/movies/My Film.original.srt")
+    #expect(OutputPath.correctionsURL(forTranscript: transcript).path == "/movies/My Film.corrections.md")
+}
