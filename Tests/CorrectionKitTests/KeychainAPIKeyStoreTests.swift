@@ -22,7 +22,12 @@ private final class FakeKeyStore: APIKeyStore, @unchecked Sendable {
 /// Live round-trip against the real login keychain; returns early where the
 /// environment has no keychain access (CI).
 @Test func keychainStoreRoundTripsWhenAvailable() throws {
-    let store = KeychainAPIKeyStore()
+    // A unique throwaway service so this test can never touch the user's real key.
+    let store = KeychainAPIKeyStore(
+        service: "com.adamjohnlea.subs.tests.\(UUID().uuidString)",
+        account: "claude-api-key"
+    )
+    defer { try? store.deleteClaudeKey() }
     let probe = "sk-ant-roundtrip-\(UUID().uuidString)"
     do {
         try store.setClaudeKey(probe)

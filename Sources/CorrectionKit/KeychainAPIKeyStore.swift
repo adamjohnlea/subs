@@ -26,14 +26,24 @@ public enum KeychainError: Error, Equatable {
 ///
 /// The item uses service `com.adamjohnlea.subs` and account `claude-api-key`.
 public struct KeychainAPIKeyStore: APIKeyStore {
-    private static let service = "com.adamjohnlea.subs"
-    private static let account = "claude-api-key"
+    private let service: String
+    private let account: String
 
     /// Creates a store that reads and writes the login keychain.
-    public init() {}
+    public init() {
+        self.init(service: "com.adamjohnlea.subs", account: "claude-api-key")
+    }
+
+    /// Creates a store for a specific keychain item.
+    ///
+    /// Internal so tests can target a throwaway item and never touch the real key.
+    init(service: String, account: String) {
+        self.service = service
+        self.account = account
+    }
 
     public func claudeKey() throws -> String? {
-        var query = Self.itemQuery
+        var query = itemQuery
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
@@ -55,7 +65,7 @@ public struct KeychainAPIKeyStore: APIKeyStore {
     public func setClaudeKey(_ key: String) throws {
         let data = Data(key.utf8)
 
-        var addQuery = Self.itemQuery
+        var addQuery = itemQuery
         addQuery[kSecValueData as String] = data
         let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
         switch addStatus {
@@ -63,7 +73,7 @@ public struct KeychainAPIKeyStore: APIKeyStore {
             return
         case errSecDuplicateItem:
             let updateStatus = SecItemUpdate(
-                Self.itemQuery as CFDictionary,
+                itemQuery as CFDictionary,
                 [kSecValueData as String: data] as CFDictionary
             )
             guard updateStatus == errSecSuccess else {
@@ -75,13 +85,13 @@ public struct KeychainAPIKeyStore: APIKeyStore {
     }
 
     public func deleteClaudeKey() throws {
-        let status = SecItemDelete(Self.itemQuery as CFDictionary)
+        let status = SecItemDelete(itemQuery as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.unexpectedStatus(status)
         }
     }
 
-    private static var itemQuery: [String: Any] {
+    private var itemQuery: [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
