@@ -1,15 +1,24 @@
 import Foundation
 
 /// One transcribed word with its start and end time in seconds, in the media's
-/// own timeline.
+/// own timeline, plus optional signals from the recognizer.
 public struct TranscribedWord: Equatable, Sendable {
     public let text: String
     public let start: Double
     public let end: Double
-    public init(text: String, start: Double, end: Double) {
+    /// The recognizer's confidence score for this word, or `nil` when it reported none.
+    public let confidence: Double?
+    /// Other candidate transcriptions the recognizer offered for this word's span,
+    /// or empty when it offered none.
+    public let alternatives: [String]
+
+    public init(text: String, start: Double, end: Double,
+                confidence: Double? = nil, alternatives: [String] = []) {
         self.text = text
         self.start = start
         self.end = end
+        self.confidence = confidence
+        self.alternatives = alternatives
     }
 }
 

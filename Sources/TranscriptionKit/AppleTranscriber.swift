@@ -33,24 +33,30 @@ public struct AppleTranscriber: Transcribing {
         try await installModelIfNeeded(locale: locale, progress: progress)
 
         let transcriber = SpeechTranscriber(locale: locale, transcriptionOptions: [],
-                                            reportingOptions: [], attributeOptions: [.audioTimeRange])
+                                            reportingOptions: [.alternativeTranscriptions],
+                                            attributeOptions: [.audioTimeRange, .transcriptionConfidence])
         let analyzer = SpeechAnalyzer(modules: [transcriber])
 
         let collector = Task { () throws -> [TranscribedWord] in
             var words: [TranscribedWord] = []
             for try await result in transcriber.results {
-                for (timeRange, range) in result.text.runs[\.audioTimeRange] {
+                // The recognizer reports alternatives for the whole result, so each word built from this result carries them.
+                let alternatives = result.alternatives.map { String($0.characters) }
+                for (timeRange, confidence, range) in result.text.runs[\.audioTimeRange, \.transcriptionConfidence] {
                     let token = String(result.text[range].characters)
                         .trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !token.isEmpty else { continue }
                     if let timeRange {
                         words.append(TranscribedWord(text: token,
                                                      start: timeRange.start.seconds,
-                                                     end: timeRange.end.seconds))
+                                                     end: timeRange.end.seconds,
+                                                     confidence: confidence,
+                                                     alternatives: alternatives))
                     } else if !words.isEmpty {
                         // Punctuation with no time range: attach to the previous word.
                         let last = words.removeLast()
-                        words.append(TranscribedWord(text: last.text + token, start: last.start, end: last.end))
+                        words.append(TranscribedWord(text: last.text + token, start: last.start, end: last.end,
+                                                     confidence: last.confidence, alternatives: last.alternatives))
                     }
                     if duration > 0, let timeRange {
                         progress(.transcribing(fraction: min(1, timeRange.end.seconds / duration)))
@@ -112,7 +118,8 @@ public struct AppleTranscriber: Transcribing {
             }
         }
         let modelProbe = SpeechTranscriber(locale: locale, transcriptionOptions: [],
-                                           reportingOptions: [], attributeOptions: [.audioTimeRange])
+                                           reportingOptions: [],
+                                           attributeOptions: [.audioTimeRange, .transcriptionConfidence])
         guard let request = try await AssetInventory.assetInstallationRequest(supporting: [modelProbe]) else { return }
         let observation = request.progress.observe(\.fractionCompleted, options: [.new]) { value, _ in
             progress(.downloadingModel(fraction: value.fractionCompleted))
