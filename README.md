@@ -178,10 +178,12 @@ swift run subs   # launch the app
 
 A `Makefile` wraps the common tasks (`make build`, `make test`, `make run`). It also builds the distributable: `make zip` produces a raw binary to hand to someone directly, and `make dist` produces the signed, notarized `.pkg` that ships on the releases page (it needs an Apple Developer ID; see the config at the top of the Makefile). Run `make help` for the full list.
 
-The project is two targets with a deliberate seam:
+The project is four targets with a deliberate seam between the library work and the UI:
 
-- `SubtitleKit` is a pure library: SRT parsing, language-availability checks, the translation pipeline, and file writing. It has no UI and no external dependencies, and it's where the unit tests live.
-- `subs` is the SwiftTUI executable: the four screens, key handling, and progress. It calls into `SubtitleKit` and knows nothing about how translation works.
+- `SubtitleKit` is the pure core: SRT parsing, language-availability checks, the translation pipeline, file writing, and the `TranscriptCorrecting` protocol the correction step is written against. Pure Foundation, no UI, no external dependencies, and it's where most of the unit tests live.
+- `TranscriptionKit` turns a video into an English `.srt` using Apple's on-device speech recognition (Speech and AVFoundation). It depends on `SubtitleKit` and nothing else.
+- `CorrectionKit` is the opt-in Claude correction: it talks to the Claude API over `URLSession`, reads the API key from the Keychain (`Security`), and conforms to `SubtitleKit`'s `TranscriptCorrecting` protocol. It depends on `SubtitleKit` and uses only system frameworks.
+- `subs` is the SwiftTUI executable: the screens, key handling, and progress. It calls into the three libraries and knows nothing about how transcription, translation, or correction actually work.
 
 That split is what would let a future two-pane editor be a second UI over the same core rather than a rewrite. The only external dependency is SwiftTUI 0.15.1, used only by the `subs` target.
 
