@@ -13,7 +13,7 @@ struct LanguageScreen: View {
     var body: some View {
         if model.availableTargets.isEmpty {
             VStack(alignment: .leading, spacing: 1) {
-                CompactHeader(step: .languages)
+                CompactHeader(step: .languages, includeTranscribe: model.isVideoFlow)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("No translation languages are installed.")
                     Text("Install them in System Settings > Language & Region > Translation Languages, then restart.")
@@ -27,7 +27,7 @@ struct LanguageScreen: View {
             .onKeyPress(.return) { _ in goBack(); return .handled }
         } else {
             VStack(alignment: .leading, spacing: 1) {
-                CompactHeader(step: .languages)
+                CompactHeader(step: .languages, includeTranscribe: model.isVideoFlow)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("space toggles  ·  enter translates").foregroundStyle(.secondary)
                     List(selection: $model.selectedTargets) {

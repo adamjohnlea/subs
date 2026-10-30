@@ -1,8 +1,8 @@
 # Installing subs
 
 `subs` translates English `.srt` subtitle files into other languages using
-Apple's on-device translation. Nothing leaves your Mac — no network, no API
-keys, no accounts.
+Apple's on-device translation, and can transcribe a video into an English
+`.srt` first. Nothing leaves your Mac: no network, no API keys, no accounts.
 
 ## What you need
 

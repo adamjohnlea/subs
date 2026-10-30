@@ -13,3 +13,8 @@ import Testing
     let out = OutputPath.translatedURL(for: input, languageCode: "fr")
     #expect(out.path == "/movies/S01.E02.fr.srt")
 }
+
+@Test func transcriptURLSwapsVideoExtensionForSRT() {
+    let video = URL(fileURLWithPath: "/movies/film.mp4")
+    #expect(OutputPath.transcriptURL(forVideo: video).path == "/movies/film.srt")
+}

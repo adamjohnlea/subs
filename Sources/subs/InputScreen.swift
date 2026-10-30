@@ -2,8 +2,8 @@ import Foundation
 import SubtitleKit
 import SwiftTUI
 
-/// The first screen: the user types a `.srt` file or a folder path, and
-/// Continue validates it before moving on to language selection.
+/// The first screen: the user types a `.srt` file, a video, or a folder path, and
+/// Continue routes a video to transcription and anything else to language selection.
 ///
 /// Validation is the real work of the app's first step: `FileDiscovery` must
 /// find at least one `.srt` file, and `SystemLanguageAvailability` decides
@@ -18,7 +18,7 @@ struct InputScreen: View {
             Text("on-device subtitle translation").foregroundStyle(.secondary)
             StepTracker(active: .input)
             VStack(alignment: .leading, spacing: 1) {
-                Text("Drop a .srt file or a folder, or type a path:")
+                Text("Drop a .srt file, a video, or a folder, or type a path:")
                 HStack(spacing: 0) {
                     Text("▸ ").foregroundStyle(Theme.accent)
                     TextField("path", text: $model.inputPath)
@@ -35,7 +35,7 @@ struct InputScreen: View {
         }
     }
 
-    /// Discovers subtitle files at the typed path and the installed target
+    /// Routes a video to transcription; otherwise discovers subtitle files and the installed target
     /// languages, then moves to the language screen. On failure it sets
     /// `model.errorMessage` and stays on this screen.
     private func advance() async {
@@ -48,16 +48,26 @@ struct InputScreen: View {
             return
         }
         let url = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
-        do {
-            let files = try FileDiscovery().srtFiles(at: url)
-            let targets = await SystemLanguageAvailability()
-                .installed(from: Locale.Language(identifier: "en"),
-                           candidates: LanguageCatalog.candidates)
-            model.discoveredFiles = files
-            model.availableTargets = targets
-            model.screen = .languages
-        } catch {
-            model.errorMessage = "\(error)"
+        var isDirectory: ObjCBool = false
+        FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory)
+        switch inputKind(forExtension: url.pathExtension, isDirectory: isDirectory.boolValue) {
+        case .video:
+            model.videoURL = url
+            model.isVideoFlow = true
+            model.screen = .transcribing
+        case .subtitles:
+            do {
+                let files = try FileDiscovery().srtFiles(at: url)
+                let targets = await SystemLanguageAvailability()
+                    .installed(from: Locale.Language(identifier: "en"),
+                               candidates: LanguageCatalog.candidates)
+                model.discoveredFiles = files
+                model.availableTargets = targets
+                model.isVideoFlow = false
+                model.screen = .languages
+            } catch {
+                model.errorMessage = "\(error)"
+            }
         }
     }
 }

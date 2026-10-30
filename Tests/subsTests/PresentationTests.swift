@@ -3,20 +3,66 @@ import Foundation
 @testable import subs
 @testable import SubtitleKit
 
-@Test func stepItemsHasFourEntriesWithExactlyOneActive() {
-    let items = stepItems(active: .translate)
+@MainActor
+@Test func startOverClearsAllStateAndReturnsToInput() {
+    let es = TargetLanguage(code: "es", displayName: "Spanish")
+    let model = AppModel()
+    model.inputPath = "/some/video.mp4"
+    model.videoURL = URL(fileURLWithPath: "/some/video.mp4")
+    model.transcriptionStage = .transcribing(fraction: 0.5)
+    model.isVideoFlow = true
+    model.discoveredFiles = [URL(fileURLWithPath: "/some/video.srt")]
+    model.availableTargets = [es]
+    model.selectedTargets = [es]
+    model.progressLog = ["film.srt → Spanish"]
+    model.errorMessage = "boom"
+    model.screen = .done
+
+    model.startOver()
+
+    #expect(model.inputPath == "")
+    #expect(model.videoURL == nil)
+    #expect(model.transcriptionStage == nil)
+    #expect(model.isVideoFlow == false)
+    #expect(model.discoveredFiles.isEmpty)
+    #expect(model.availableTargets.isEmpty)
+    #expect(model.selectedTargets.isEmpty)
+    #expect(model.progress == nil)
+    #expect(model.progressLog.isEmpty)
+    #expect(model.outcomes.isEmpty)
+    #expect(model.errorMessage == nil)
+    #expect(model.screen == .input)
+}
+
+@Test func stepItemsHasFourEntriesForSubtitleFlow() {
+    let items = stepItems(active: .translate, includeTranscribe: false)
     #expect(items.count == 4)
     #expect(items.filter(\.isActive).count == 1)
-    #expect(items[2].isActive)
     #expect(items[0].label == "Choose input")
     #expect(items[3].label == "Done")
 }
 
+@Test func stepItemsHasFiveEntriesForVideoFlow() {
+    let items = stepItems(active: .transcribe, includeTranscribe: true)
+    #expect(items.count == 5)
+    #expect(items[1].label == "Transcribe")
+    #expect(items[1].isActive)
+}
+
 @Test func screenMapsToStep() {
     #expect(AppModel.Screen.input.step == .input)
+    #expect(AppModel.Screen.transcribing.step == .transcribe)
     #expect(AppModel.Screen.languages.step == .languages)
     #expect(AppModel.Screen.running.step == .translate)
     #expect(AppModel.Screen.done.step == .done)
+}
+
+@Test func inputKindTreatsSrtAndFoldersAsSubtitles() {
+    #expect(inputKind(forExtension: "srt", isDirectory: false) == .subtitles)
+    #expect(inputKind(forExtension: "SRT", isDirectory: false) == .subtitles)
+    #expect(inputKind(forExtension: "", isDirectory: true) == .subtitles)   // a folder
+    #expect(inputKind(forExtension: "mp4", isDirectory: false) == .video)
+    #expect(inputKind(forExtension: "mov", isDirectory: false) == .video)
 }
 
 @Test func progressLineComputesPercentAndCount() {
