@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%2026%2B%20·%20Apple%20Silicon-lightgrey)](https://github.com/adamjohnlea/subs/releases/latest)
 
+![The subs Languages screen: a checklist of installed translation languages with Spanish and Portuguese selected, a step tracker across the top (Choose input, Languages, Translate, Done), and a key-hints line at the bottom.](docs/hero.png)
+
 Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
 
 v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done.
@@ -84,6 +86,8 @@ You can also give it a single video file instead, such as an `.mp4` or `.mov`. s
 
 Press Return (or select Continue) to validate. subs checks that it can find at least one subtitle file and reads which target languages you have installed. If the path is empty, wrong, or has no `.srt` files, the reason shows in red inside the card, and you stay on this screen.
 
+Nothing to point it at yet? The repo ships a tiny sample at [`examples/hello.srt`](examples/hello.srt). Run `subs`, give it that path (or the `examples` folder), pick a language, and you'll get `examples/hello.es.srt` (for Spanish) next to it.
+
 ### 2. Languages
 
 A checklist of every target language whose pack is installed, filtered from the full catalog below. Move with the arrow keys, press Space to toggle a language on or off, and watch the running count (`2 selected`). A filled violet marker means selected.
@@ -111,9 +115,11 @@ Press Return (or select Translate more) to start over.
 Translated files are written next to the original, with the language code inserted before the extension:
 
 ```
-Arrival.en.srt   ->   Arrival.es.srt   (Spanish)
-                      Arrival.fr.srt   (French)
+Arrival.srt   ->   Arrival.es.srt   (Spanish)
+                   Arrival.fr.srt   (French)
 ```
+
+The code is inserted, not substituted, so a source that already carries a language tag keeps it: `Arrival.en.srt` becomes `Arrival.en.es.srt`. (On a folder re-run, those outputs are skipped by their language suffix, so they aren't translated again.)
 
 Indices and timestamps are copied through byte for byte. Only the subtitle text is translated.
 
