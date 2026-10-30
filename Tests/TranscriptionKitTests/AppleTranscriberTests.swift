@@ -1,7 +1,8 @@
 import Foundation
 import Testing
 import Speech
-@testable import SubtitleKit
+import SubtitleKit
+@testable import TranscriptionKit
 
 /// Generates a short spoken-audio clip with `/usr/bin/say`.
 private func makeSpokenClip() throws -> URL {

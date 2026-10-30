@@ -8,7 +8,7 @@ public struct TranscriptionJob {
     private let writer: SRTWriter
     private let fileManager: FileManager
 
-    public init(transcriber: Transcribing = AppleTranscriber(),
+    public init(transcriber: Transcribing,
                 writer: SRTWriter = SRTWriter(),
                 fileManager: FileManager = .default) {
         self.transcriber = transcriber

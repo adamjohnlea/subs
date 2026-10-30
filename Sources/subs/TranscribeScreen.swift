@@ -1,6 +1,7 @@
 import Foundation
 import SubtitleKit
 import SwiftTUI
+import TranscriptionKit
 
 /// The screen shown for a video input: it transcribes the video into an English
 /// `.srt`, then advances to language selection with that file as the input.
@@ -51,7 +52,7 @@ struct TranscribeScreen: View {
         model.transcriptionStage = nil
         let model = model
         do {
-            let srt = try await TranscriptionJob().run(video: video) { stage in
+            let srt = try await TranscriptionJob(transcriber: AppleTranscriber()).run(video: video) { stage in
                 Task { @MainActor in model.transcriptionStage = stage }
             }
             let targets = await SystemLanguageAvailability()
