@@ -28,7 +28,9 @@ private final class FakeKeyStore: APIKeyStore, @unchecked Sendable {
         service: "com.adamjohnlea.subs.tests.\(UUID().uuidString)",
         account: "claude-api-key"
     )
-    defer { try? store.deleteClaudeKey() }
+    defer {
+        do { try store.deleteClaudeKey() } catch { Issue.record("keychain cleanup failed: \(error)") }
+    }
     let probe = "sk-ant-roundtrip-\(UUID().uuidString)"
     do {
         try store.setClaudeKey(probe)

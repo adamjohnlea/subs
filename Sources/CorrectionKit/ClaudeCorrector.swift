@@ -31,6 +31,9 @@ public struct ClaudeCorrector: TranscriptCorrecting {
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.setValue(key, forHTTPHeaderField: "x-api-key")
         request.httpBody = CorrectionPrompt.requestBody(for: words)
+        // A long transcript with adaptive thinking and a non-streamed response can take
+        // minutes to answer; the 60 second default would fail it as a transport error.
+        request.timeoutInterval = 300
 
         let data: Data
         let response: URLResponse

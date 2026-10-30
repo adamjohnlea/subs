@@ -109,3 +109,19 @@ private func makeTempDir() throws -> URL {
     let found = try FileDiscovery().srtFiles(at: file)
     #expect(found.map(\.lastPathComponent) == ["movie.es.srt"])
 }
+
+@Test func folderDiscoverySkipsUncorrectedOriginalTranscripts() throws {
+    let dir = try makeTempDir()
+    for name in ["film.srt", "film.original.srt", "other.srt"] {
+        try "x".write(to: dir.appendingPathComponent(name), atomically: true, encoding: .utf8)
+    }
+    let found = try FileDiscovery().srtFiles(at: dir)
+    #expect(found.map(\.lastPathComponent) == ["film.srt", "other.srt"])
+}
+
+@Test func explicitOriginalTranscriptPathIsStillHonored() throws {
+    let dir = try makeTempDir()
+    let file = dir.appendingPathComponent("film.original.srt")
+    try "x".write(to: file, atomically: true, encoding: .utf8)
+    #expect(try FileDiscovery().srtFiles(at: file).map(\.lastPathComponent) == ["film.original.srt"])
+}
