@@ -59,6 +59,16 @@ final class AppModel {
     /// A message to surface to the user when something goes wrong.
     var errorMessage: String?
 
+    /// Whether the user has opted in to Claude transcript correction for the
+    /// next video. Off by default; the transcript is sent to the Claude API
+    /// only when this is on.
+    var correctionEnabled: Bool = false
+
+    /// Set when Claude correction failed on the Transcribe screen. While set,
+    /// that screen shows the failure and offers Proceed uncorrected or Back
+    /// instead of moving on.
+    var correctionFailure: CorrectionFailure?
+
     /// Clears all input, run, and video state and returns to the Choose-input
     /// screen, so the next run starts fresh. Used by "Translate more" on the
     /// done screen; a leftover path or video flow must not carry into a new run.
@@ -74,6 +84,32 @@ final class AppModel {
         progressLog = []
         outcomes = []
         errorMessage = nil
+        correctionEnabled = false
+        correctionFailure = nil
         screen = .input
     }
+}
+
+/// A Claude correction failure as shown on the Transcribe screen: the error
+/// message, plus how to fix it when the cause is a missing API key.
+struct CorrectionFailure: Equatable {
+    /// The plain-language reason correction failed.
+    let message: String
+
+    /// What to do about it, or `nil` when there is no specific remedy.
+    let guidance: String?
+
+    /// Describes `error` for display.
+    init(_ error: CorrectorError) {
+        message = error.description
+        guidance = error == .noKey
+            ? "Run `subs set-claude-key` in a terminal to save your key, then try again."
+            : nil
+    }
+}
+
+/// The failure to show on the Transcribe screen for `error`, or `nil` when it
+/// is not a Claude correction failure and should take the generic error path.
+func correctionFailure(for error: Error) -> CorrectionFailure? {
+    (error as? CorrectorError).map(CorrectionFailure.init)
 }

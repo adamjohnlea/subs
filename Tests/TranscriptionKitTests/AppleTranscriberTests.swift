@@ -30,3 +30,20 @@ private func makeSpokenClip() throws -> URL {
     #expect(words.allSatisfy { $0.end >= $0.start })
     #expect(words.contains { $0.text.lowercased().contains("hello") })
 }
+
+/// Live check that transcription returns words and reports whether the recognizer's signals populate.
+///
+/// Set `SUBS_LIVE_CLIP` to the path of a short spoken audio or video file to run it. When the variable is
+/// unset, the file is missing, or the speech framework is unavailable, it returns early and passes, so
+/// machines that cannot run it (as on CI) stay green.
+@Test func liveTranscriptionReturnsWordsAndReportsSignals() async throws {
+    guard SpeechTranscriber.isAvailable,
+          let path = ProcessInfo.processInfo.environment["SUBS_LIVE_CLIP"],
+          FileManager.default.fileExists(atPath: path) else { return }
+    let words = try await AppleTranscriber().transcribe(video: URL(fileURLWithPath: path)) { _ in }
+    #expect(!words.isEmpty)
+    // Informational, not an assertion: records whether the headless path populates signals.
+    let withConfidence = words.filter { $0.confidence != nil }.count
+    let withAlternatives = words.filter { !$0.alternatives.isEmpty }.count
+    FileHandle.standardError.write(Data("signals: \(withConfidence)/\(words.count) confidence, \(withAlternatives)/\(words.count) alternatives\n".utf8))
+}

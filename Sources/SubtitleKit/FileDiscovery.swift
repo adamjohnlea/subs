@@ -25,7 +25,8 @@ public struct FileDiscovery {
     ///
     /// During folder discovery, files that already carry a target-language suffix (e.g. `movie.es.srt`)
     /// are skipped, so re-running a folder does not re-translate prior outputs. A file passed directly
-    /// is always honored, even when it carries such a suffix.
+    /// is always honored, even when it carries such a suffix. Folder discovery also skips
+    /// `film.original.srt`, the uncorrected transcript kept beside a Claude-corrected `film.srt`.
     ///
     /// - Parameter path: An `.srt` file or a folder.
     /// - Throws: `SubtitleDiscoveryError` if the path is missing or yields no `.srt` files.
@@ -53,9 +54,16 @@ public struct FileDiscovery {
                 return values?.isDirectory != true
             }
             .filter { !Self.isAlreadyTranslated($0) }
+            .filter { !Self.isOriginalTranscript($0) }
             .sorted { $0.path < $1.path }
         guard !srts.isEmpty else { throw SubtitleDiscoveryError.noSRTFiles(path) }
         return srts
+    }
+
+    /// Whether `url` is the uncorrected transcript (`film.original.srt`) saved beside a corrected one.
+    /// Folder discovery skips it so the uncorrected text is never translated.
+    private static func isOriginalTranscript(_ url: URL) -> Bool {
+        url.lastPathComponent.lowercased().hasSuffix(".original.srt")
     }
 
     /// Whether `url` looks like an output this app produced, i.e. its name ends in

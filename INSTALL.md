@@ -3,6 +3,9 @@
 `subs` translates English `.srt` subtitle files into other languages using
 Apple's on-device translation, and can transcribe a video into an English
 `.srt` first. Nothing leaves your Mac: no network, no API keys, no accounts.
+The one exception is Claude correction, which is off by default. If you turn it
+on, the English transcript from a video is sent to the Claude API (see
+"Optional: Claude correction" below).
 
 ## What you need
 
@@ -40,9 +43,9 @@ installed the `.pkg`, you are done — ignore that section.)
 **Why does it ask for my password?** The installer is copying `subs` into a
 protected system folder (`/usr/local/bin`), so macOS asks for your Mac login
 password once, during install. That's the operating system guarding the
-folder, not `subs` doing anything online. The app itself never asks for a
-login, API key, or account. Once it's installed, just run `subs` — no `sudo`,
-no password.
+folder, not `subs` doing anything online. The app never asks for a login or
+account, and needs an API key only if you turn on Claude correction (below).
+Once it's installed, just run `subs`, with no `sudo` and no password.
 
 ### Only if you got a `.zip` instead (skip if you used the `.pkg`)
 
@@ -89,6 +92,26 @@ paste it, or drag the file or folder from Finder into the terminal — pick your
 target languages from the list, and let it go. It writes a new file per language
 next to the original (for example `movie.srt` → `movie.es.srt`) and never
 touches timestamps — only the subtitle text is translated.
+
+## Optional: Claude correction
+
+`subs` is entirely on your Mac **unless you enable Claude correction.** It is
+**off by default.** When you turn it on (the "Claude correction" row on the
+first screen), the English transcript of a video you give `subs` is sent to the
+Claude API to fix misheard words before the subtitles are made. It only ever
+sends English transcript text, and it only runs on a video `subs` transcribes
+fresh, never on a `.srt` you supply or an existing `film.srt` it reuses.
+
+It needs a Claude API key. Save it once, in Terminal:
+
+```
+subs set-claude-key
+```
+
+You paste the key at a hidden prompt (nothing shows as you type) and `subs`
+stores it in your Keychain. Don't pass the key as an argument; it would end up
+in your shell history. If correction fails, `subs` shows why and lets you
+**Proceed uncorrected** or go **Back**.
 
 ## If a language isn't in the list
 

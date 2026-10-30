@@ -20,4 +20,14 @@ public enum OutputPath {
     public static func transcriptURL(forVideo video: URL) -> URL {
         video.deletingPathExtension().appendingPathExtension("srt")
     }
+
+    /// Where the uncorrected transcript is kept: `/movies/film.srt` -> `/movies/film.original.srt`.
+    public static func originalTranscriptURL(forTranscript transcript: URL) -> URL {
+        transcript.deletingPathExtension().appendingPathExtension("original.srt")
+    }
+
+    /// Where the correction changelog is written: `/movies/film.srt` -> `/movies/film.corrections.md`.
+    public static func correctionsURL(forTranscript transcript: URL) -> URL {
+        transcript.deletingPathExtension().appendingPathExtension("corrections.md")
+    }
 }

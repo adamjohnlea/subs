@@ -33,3 +33,19 @@ private func w(_ text: String, _ start: Double, _ end: Double) -> TranscribedWor
 @Test func emptyWordsProduceNoCues() {
     #expect(CueBuilder.cues(from: []).isEmpty)
 }
+
+@Test func transcribedWordCarriesOptionalSignals() {
+    let bare = TranscribedWord(text: "Boolean", start: 0, end: 1)
+    #expect(bare.confidence == nil)
+    #expect(bare.alternatives.isEmpty)
+    let rich = TranscribedWord(text: "bullion", start: 0, end: 1, confidence: 0.98, alternatives: ["Boolean"])
+    #expect(rich.confidence == 0.98)
+    #expect(rich.alternatives == ["Boolean"])
+}
+
+@Test func cueBuildingIgnoresSignals() {
+    // Same words, one bare and one with signals, group into identical cues.
+    let a = CueBuilder.cues(from: [TranscribedWord(text: "Hi.", start: 0, end: 0.5)])
+    let b = CueBuilder.cues(from: [TranscribedWord(text: "Hi.", start: 0, end: 0.5, confidence: 0.4, alternatives: ["High"])])
+    #expect(a == b)
+}

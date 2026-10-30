@@ -17,6 +17,15 @@ private struct ThrowingTranscriber: Transcribing {
     }
 }
 
+private struct FakeCorrector: TranscriptCorrecting {
+    let edits: [WordEdit]
+    func edits(for words: [TranscribedWord]) async throws -> [WordEdit] { edits }
+}
+
+private struct ThrowingCorrector: TranscriptCorrecting {
+    func edits(for words: [TranscribedWord]) async throws -> [WordEdit] { throw CorrectorError.noKey }
+}
+
 private func makeTempDir() throws -> URL {
     let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -81,4 +90,53 @@ private func makeTempDir() throws -> URL {
 @Test func transcriptURLReplacesExtensionWithSRT() {
     let video = URL(fileURLWithPath: "/movies/My Film.mov")
     #expect(OutputPath.transcriptURL(forVideo: video).lastPathComponent == "My Film.srt")
+}
+
+@Test func freshTranscriptIsCorrectedAndRecorded() async throws {
+    let dir = try makeTempDir()
+    let video = dir.appendingPathComponent("film.mp4"); try Data().write(to: video)
+    let words = [TranscribedWord(text: "mesh", start: 0, end: 1),
+                 TranscribedWord(text: "bullion", start: 1, end: 2)]
+    let corrector = FakeCorrector(edits: [WordEdit(start: 1, end: 1, replacement: ["Boolean"], reason: "3D term")])
+    let out = try await TranscriptionJob(transcriber: FakeTranscriber(words: words), corrector: corrector).run(video: video) { _ in }
+
+    let doc = try SRTParser().parse(String(contentsOf: out, encoding: .utf8))
+    #expect(doc.cues[0].textLines.joined(separator: " ").contains("Boolean"))       // film.srt is corrected
+    #expect(FileManager.default.fileExists(atPath: dir.appendingPathComponent("film.original.srt").path))   // preserved
+    let log = try String(contentsOf: dir.appendingPathComponent("film.corrections.md"), encoding: .utf8)
+    #expect(log.contains("bullion") && log.contains("Boolean"))                      // changelog written
+}
+
+@Test func reusedTranscriptIsNeverCorrected() async throws {
+    let dir = try makeTempDir()
+    let video = dir.appendingPathComponent("film.mp4"); try Data().write(to: video)
+    let existing = dir.appendingPathComponent("film.srt")
+    let handCorrected = "1\n00:00:01,000 --> 00:00:02,000\nHand corrected\n"
+    try handCorrected.write(to: existing, atomically: true, encoding: .utf8)
+
+    let out = try await TranscriptionJob(transcriber: FakeTranscriber(words: [TranscribedWord(text: "x", start: 0, end: 1)]),
+                                         corrector: FakeCorrector(edits: [WordEdit(start: 0, end: 0, replacement: ["y"], reason: "n/a")])).run(video: video) { _ in }
+    #expect(out == existing)
+    #expect(try String(contentsOf: out, encoding: .utf8) == handCorrected)                           // untouched
+    #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("film.corrections.md").path))
+    #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("film.original.srt").path))
+}
+
+@Test func correctorFailurePropagatesAndWritesNoFile() async throws {
+    let dir = try makeTempDir()
+    let video = dir.appendingPathComponent("film.mp4"); try Data().write(to: video)
+    let job = TranscriptionJob(transcriber: FakeTranscriber(words: [TranscribedWord(text: "x", start: 0, end: 1)]), corrector: ThrowingCorrector())
+    await #expect(throws: CorrectorError.noKey) { _ = try await job.run(video: video) { _ in } }
+    for name in ["film.srt", "film.original.srt", "film.corrections.md"] {
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent(name).path))
+    }
+}
+
+@Test func noCorrectorLeavesBehaviorUnchanged() async throws {
+    let dir = try makeTempDir()
+    let video = dir.appendingPathComponent("film.mp4"); try Data().write(to: video)
+    let out = try await TranscriptionJob(transcriber: FakeTranscriber(words: [TranscribedWord(text: "Hi.", start: 0, end: 1)])).run(video: video) { _ in }
+    #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("film.corrections.md").path))
+    #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("film.original.srt").path))
+    #expect(out.lastPathComponent == "film.srt")
 }
