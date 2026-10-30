@@ -44,8 +44,8 @@ installed the `.pkg`, you are done — ignore that section.)
 protected system folder (`/usr/local/bin`), so macOS asks for your Mac login
 password once, during install. That's the operating system guarding the
 folder, not `subs` doing anything online. The app never asks for a login or
-account, and it needs an API key only if you turn on Claude correction (below). Once it's installed, just run `subs` — no `sudo`,
-no password.
+account, and needs an API key only if you turn on Claude correction (below).
+Once it's installed, just run `subs`, with no `sudo` and no password.
 
 ### Only if you got a `.zip` instead (skip if you used the `.pkg`)
 

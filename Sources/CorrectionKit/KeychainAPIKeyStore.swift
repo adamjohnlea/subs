@@ -17,9 +17,18 @@ public protocol APIKeyStore: Sendable {
 }
 
 /// An error from a Keychain operation.
-public enum KeychainError: Error, Equatable {
+public enum KeychainError: Error, Equatable, CustomStringConvertible {
     /// The Security framework returned a status this store does not handle.
     case unexpectedStatus(OSStatus)
+
+    /// A plain-language reason, with the Security framework's message when it has one.
+    public var description: String {
+        switch self {
+        case .unexpectedStatus(let status):
+            let message = SecCopyErrorMessageString(status, nil) as String?
+            return message.map { "\($0) (status \(status))" } ?? "Keychain status \(status)"
+        }
+    }
 }
 
 /// An `APIKeyStore` backed by a generic-password item in the login keychain.

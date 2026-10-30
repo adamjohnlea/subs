@@ -107,3 +107,9 @@ struct CorrectionFailure: Equatable {
             : nil
     }
 }
+
+/// The failure to show on the Transcribe screen for `error`, or `nil` when it
+/// is not a Claude correction failure and should take the generic error path.
+func correctionFailure(for error: Error) -> CorrectionFailure? {
+    (error as? CorrectorError).map(CorrectionFailure.init)
+}

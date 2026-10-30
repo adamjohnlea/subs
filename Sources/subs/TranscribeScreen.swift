@@ -69,6 +69,10 @@ struct TranscribeScreen: View {
     /// no transcript, so there is nothing to reuse: transcribing again without
     /// Claude is the one way to continue.
     private func proceedUncorrected() {
+        // Clear the failure synchronously, before the Task starts, so a second
+        // press finds nothing to act on and cannot start a second run.
+        guard model.correctionFailure != nil else { return }
+        model.correctionFailure = nil
         Task { await transcribe(corrector: nil) }
     }
 
@@ -119,11 +123,13 @@ struct TranscribeScreen: View {
             model.discoveredFiles = [srt]
             model.availableTargets = targets
             model.screen = .languages
-        } catch let error as CorrectorError {
-            model.correctionFailure = CorrectionFailure(error)
         } catch {
-            model.errorMessage = "\(error)"
-            model.screen = .input
+            if let failure = correctionFailure(for: error) {
+                model.correctionFailure = failure
+            } else {
+                model.errorMessage = "\(error)"
+                model.screen = .input
+            }
         }
     }
 }

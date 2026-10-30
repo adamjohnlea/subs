@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import CorrectionKit
+import SubtitleKit
 
 /// Fake proves `APIKeyStore` consumers can be tested without the Keychain.
 private final class FakeKeyStore: APIKeyStore, @unchecked Sendable {
@@ -35,4 +36,38 @@ private final class FakeKeyStore: APIKeyStore, @unchecked Sendable {
     } catch { return }   // no keychain access in this environment: skip, don't fail
     try store.deleteClaudeKey()
     #expect(try store.claudeKey() == nil)
+}
+
+private struct ThrowingKeyStore: APIKeyStore {
+    let error: any Error
+    func claudeKey() throws -> String? { throw error }
+    func setClaudeKey(_ key: String) throws { throw error }
+    func deleteClaudeKey() throws { throw error }
+}
+
+@Test func unreadableKeychainIsNotReportedAsAMissingKey() async {
+    // errSecInteractionNotAllowed (-25308): the keychain is locked.
+    let corrector = ClaudeCorrector(keyStore: ThrowingKeyStore(error: KeychainError.unexpectedStatus(-25308)))
+    do {
+        _ = try await corrector.edits(for: [])
+        Issue.record("expected a CorrectorError")
+    } catch let error as CorrectorError {
+        guard case .keychain(let reason) = error else {
+            Issue.record("expected .keychain, got \(error)")
+            return
+        }
+        #expect(reason.contains("-25308"))
+    } catch {
+        Issue.record("expected a CorrectorError, got \(error)")
+    }
+}
+
+@Test func missingKeyIsStillNoKey() async {
+    let corrector = ClaudeCorrector(keyStore: FakeKeyStore())
+    do {
+        _ = try await corrector.edits(for: [])
+        Issue.record("expected a CorrectorError")
+    } catch {
+        #expect(error as? CorrectorError == .noKey)
+    }
 }

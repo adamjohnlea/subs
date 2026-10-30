@@ -15,7 +15,15 @@ public struct ClaudeCorrector: TranscriptCorrecting {
     }
 
     public func edits(for words: [TranscribedWord]) async throws -> [WordEdit] {
-        guard let key = try keyStore.claudeKey() else { throw CorrectorError.noKey }
+        let storedKey: String?
+        do {
+            storedKey = try keyStore.claudeKey()
+        } catch {
+            // A locked keychain or a denied access prompt is not a missing key,
+            // so it must not tell the user to re-enter one.
+            throw CorrectorError.keychain("\(error)")
+        }
+        guard let key = storedKey else { throw CorrectorError.noKey }
 
         var request = URLRequest(url: Self.endpoint)
         request.httpMethod = "POST"

@@ -29,7 +29,7 @@ let package = Package(
     .testTarget(name: "SubtitleKitTests", dependencies: ["SubtitleKit"]),
     .testTarget(name: "TranscriptionKitTests", dependencies: ["TranscriptionKit", "SubtitleKit"]),
     .testTarget(name: "CorrectionKitTests", dependencies: ["CorrectionKit", "SubtitleKit"]),
-    .testTarget(name: "subsTests", dependencies: ["subs", "SubtitleKit"]),
+    .testTarget(name: "subsTests", dependencies: ["subs", "SubtitleKit", "CorrectionKit"]),
   ],
   swiftLanguageModes: [.v6]
 )

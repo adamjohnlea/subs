@@ -28,6 +28,8 @@ public struct WordEdit: Equatable, Sendable {
 public enum CorrectorError: Error, Equatable, CustomStringConvertible {
     /// No Claude API key is stored.
     case noKey
+    /// The stored API key could not be read, for example because the Keychain is locked or access was denied.
+    case keychain(String)
     /// The model declined to answer, with its explanation when it gave one.
     case refused(String)
     /// The model ran out of room before finishing its answer.
@@ -44,6 +46,8 @@ public enum CorrectorError: Error, Equatable, CustomStringConvertible {
         switch self {
         case .noKey:
             return "No Claude API key is saved. Add one to correct transcripts."
+        case .keychain(let reason):
+            return "Couldn't read the Claude API key from the Keychain: \(reason)"
         case .refused(let explanation):
             return "Claude declined to correct this transcript: \(explanation)"
         case .truncated:
