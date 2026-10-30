@@ -8,8 +8,9 @@ public struct TranscribedWord: Equatable, Sendable {
     public let end: Double
     /// The recognizer's confidence score for this word, or `nil` when it reported none.
     public let confidence: Double?
-    /// Other candidate transcriptions the recognizer offered for this word's span,
-    /// or empty when it offered none.
+    /// The recognizer's alternative transcriptions for the whole result segment that
+    /// contains this word, or empty when it offered none. Every word in that segment
+    /// carries the same list, so consumers should dedupe per segment.
     public let alternatives: [String]
 
     public init(text: String, start: Double, end: Double,
