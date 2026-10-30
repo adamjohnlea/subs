@@ -24,6 +24,7 @@ struct InputScreen: View {
                     TextField("path", text: $model.inputPath)
                         .onSubmit { Task { await advance() } }
                 }
+                correctionRow
                 if let error = model.errorMessage {
                     Text("✗ \(error)").foregroundStyle(.danger)
                 }
@@ -33,6 +34,30 @@ struct InputScreen: View {
                 .foregroundStyle(Theme.accent)
             HintFooter(hints: [("↵", "continue"), ("^C", "quit")])
         }
+    }
+
+    /// The opt-in row for Claude correction. Off by default; the button flips it.
+    private var correctionRow: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 1) {
+                Text("Claude correction: ")
+                Text(model.correctionEnabled ? "on" : "off")
+                    .foregroundStyle(model.correctionEnabled
+                                     ? AnyShapeStyle(Theme.accent)
+                                     : AnyShapeStyle(.secondary))
+                Button(model.correctionEnabled ? "Turn off" : "Turn on") { toggleCorrection() }
+                    .foregroundStyle(Theme.accent)
+            }
+            if model.correctionEnabled {
+                Text("Videos only: sends the English transcript to the Claude API. Needs a key (subs set-claude-key).")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// Flips Claude correction on or off.
+    private func toggleCorrection() {
+        model.correctionEnabled.toggle()
     }
 
     /// Routes a video to transcription; otherwise discovers subtitle files and the installed target

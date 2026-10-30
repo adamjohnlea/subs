@@ -6,7 +6,7 @@
 
 ![The subs Languages screen: a checklist of installed translation languages with Spanish and Portuguese selected, a step tracker across the top (Choose input, Languages, Translate, Done), and a key-hints line at the bottom.](docs/hero.png)
 
-Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
+Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. The one exception is an opt-in you turn on yourself: [Claude correction](#optional-claude-correction-opt-in), which sends an English transcript to the Claude API. It is off by default. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
 
 v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done. Hand it a video instead and subs transcribes the English captions on-device first, then translates them the same way.
 
@@ -84,6 +84,8 @@ Type or paste a path to a single `.srt` file or a folder of `.srt` files, or jus
 
 You can also give it a single video file instead, such as an `.mp4` or `.mov`. subs transcribes the speech into an English `.srt` on your Mac, using Apple's on-device speech recognition. The first time, it downloads the English speech model if your Mac doesn't have it yet. Once the transcript is ready, subs offers to translate it, the same as any subtitle file. The English transcript is written next to the video as `film.srt` (for `film.mp4`) and reused on later runs, so if one already exists, subs uses it as is. That also means you can hand-correct the transcript and run again. Video input is one file at a time for now; folders are still searched for `.srt` files only.
 
+The Input card also has a **Claude correction** row, off by default, with a button to turn it on. See [Optional: Claude correction](#optional-claude-correction-opt-in).
+
 Press Return (or select Continue) to validate. subs checks that it can find at least one subtitle file and reads which target languages you have installed. If the path is empty, wrong, or has no `.srt` files, the reason shows in red inside the card, and you stay on this screen.
 
 Nothing to point it at yet? The repo ships a tiny sample at [`examples/hello.srt`](examples/hello.srt). Run `subs`, give it that path (or the `examples` folder), pick a language, and you'll get `examples/hello.es.srt` (for Spanish) next to it.
@@ -109,6 +111,17 @@ A summary of the run. Each written file shows with a green check; each failure s
 One bad file or language never kills the run. The rest still process, and every outcome, good or bad, is reported here.
 
 Press Return (or select Translate more) to start over.
+
+## Optional: Claude correction (opt-in)
+
+subs is entirely on your Mac **unless you enable Claude correction.** When you turn it on, the English transcript subs just produced from a video is sent to the Claude API, which fixes misheard words and proper nouns before the transcript becomes subtitles. Nothing is sent otherwise.
+
+- **Off by default.** Turn it on from the Claude correction row on the Choose input screen, once per run. It resets when you start over.
+- **English transcript only.** Only the English text (with the recognizer's confidence and alternate guesses) is sent. Translation still happens on your Mac.
+- **Freshly transcribed video only.** It never runs on a `.srt` you give subs, and never on an existing `film.srt` that subs reuses, so your hand corrections are never overwritten.
+- **Needs a Claude API key.** Save it once with `subs set-claude-key`. You type it at a hidden prompt (never as an argument, so it stays out of your shell history), and subs stores it in your Keychain.
+- **You keep the original and a changelog.** The uncorrected transcript is saved as `film.original.srt` and every change is listed in `film.corrections.md`, next to the video.
+- **A failure is never silent.** If correction fails (no key, a network error, the service declines), subs shows the reason and lets you choose **Proceed uncorrected** or **Back**.
 
 ## Output files
 
