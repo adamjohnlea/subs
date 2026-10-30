@@ -8,7 +8,7 @@
 
 Translate English `.srt` subtitle files into other languages, entirely on your Mac. subs uses Apple's on-device Translation framework, so nothing leaves the machine: no network, no upload, no API keys, no accounts. It runs as a small terminal app built with [SwiftTUI](https://swifttui.sh).
 
-v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done.
+v1 is pick-and-go: point it at a subtitle file or a folder, pick your target languages, watch it run, done. Hand it a video instead and subs transcribes the English captions on-device first, then translates them the same way.
 
 > **Before you download:** subs needs **macOS 26 (Tahoe) or newer, on an Apple Silicon Mac.** On an older macOS it won't launch — it aborts at startup with a `dyld` error like *"built for macOS 26.0 which is newer than running OS."* That's not a bug; the on-device translation it relies on only exists on macOS 26+. If you're on an older version, update to Tahoe first (or it can't run on that Mac).
 
